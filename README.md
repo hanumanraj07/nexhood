@@ -389,120 +389,82 @@ Next.js renders dashboard with Recharts + Mapbox visualization
 
 ```
 nexhood/
-├── apps/
-│   ├── web/                          # Next.js frontend
-│   │   ├── public/
-│   │   │   ├── assets/
-│   │   │   └── icons/
-│   │   ├── src/
-│   │   │   ├── app/                  # Next.js App Router
-│   │   │   │   ├── (auth)/
-│   │   │   │   │   ├── login/
-│   │   │   │   │   └── register/
-│   │   │   │   ├── dashboard/
-│   │   │   │   │   ├── page.tsx
-│   │   │   │   │   ├── neighborhood/
-│   │   │   │   │   ├── parking/
-│   │   │   │   │   └── admin/
-│   │   │   │   └── layout.tsx
-│   │   │   ├── components/
-│   │   │   │   ├── ui/               # Reusable primitives
-│   │   │   │   ├── maps/             # Mapbox components
-│   │   │   │   ├── charts/           # Recharts wrappers
-│   │   │   │   ├── parking/          # QR + slot components
-│   │   │   │   └── neighborhood/     # Score + analytics cards
-│   │   │   ├── store/                # Zustand stores
-│   │   │   ├── hooks/                # Custom React hooks
-│   │   │   ├── lib/                  # Axios, utils, constants
-│   │   │   ├── types/                # TypeScript interfaces
-│   │   │   └── styles/
-│   │   ├── .env.local.example
-│   │   ├── next.config.js
-│   │   ├── tailwind.config.js
-│   │   └── package.json
+├── client/                     # React frontend (View)
+│   ├── public/
+│   ├── src/
+│   │   ├── assets/             # images, icons
+│   │   ├── components/         # reusable UI
+│   │   │   ├── ui/
+│   │   │   ├── layout/
+│   │   │   ├── charts/
+│   │   │   └── map/
+│   │   │
+│   │   ├── pages/              # main pages (View layer)
+│   │   │   ├── Home.jsx
+│   │   │   ├── Login.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── Neighborhood.jsx
+│   │   │   └── Parking.jsx
+│   │   │
+│   │   ├── hooks/              # Controller logic (React hooks)
+│   │   │   ├── useAuth.js
+│   │   │   ├── useNeighborhood.js
+│   │   │   └── useParking.js
+│   │   │
+│   │   ├── services/           # API calls (Controller)
+│   │   │   ├── api.js
+│   │   │   ├── authService.js
+│   │   │   ├── neighborhoodService.js
+│   │   │   └── parkingService.js
+│   │   │
+│   │   ├── context/            # global state (optional)
+│   │   │   └── AuthContext.jsx
+│   │   │
+│   │   ├── utils/              # helpers
+│   │   │   ├── constants.js
+│   │   │   └── helpers.js
+│   │   │
+│   │   ├── data/               # static/mock data (IMPORTANT)
+│   │   │   └── neighborhoods.json
+│   │   │
+│   │   ├── App.jsx
+│   │   └── main.jsx
 │   │
-│   └── guard-app/                    # Lightweight PWA for security guards
-│       ├── src/
-│       │   ├── scanner/
-│       │   └── components/
-│       └── package.json
+│   ├── package.json
+│   └── tailwind.config.js
 │
-├── services/
-│   ├── api/                          # Express.js backend
-│   │   ├── src/
-│   │   │   ├── config/
-│   │   │   │   ├── db.ts             # MongoDB + Prisma connections
-│   │   │   │   └── redis.ts
-│   │   │   ├── middleware/
-│   │   │   │   ├── auth.ts           # JWT verification
-│   │   │   │   ├── rbac.ts           # Role-based access
-│   │   │   │   ├── rateLimiter.ts
-│   │   │   │   └── errorHandler.ts
-│   │   │   ├── modules/
-│   │   │   │   ├── auth/
-│   │   │   │   │   ├── auth.routes.ts
-│   │   │   │   │   ├── auth.controller.ts
-│   │   │   │   │   └── auth.service.ts
-│   │   │   │   ├── neighborhood/
-│   │   │   │   │   ├── neighborhood.routes.ts
-│   │   │   │   │   ├── neighborhood.controller.ts
-│   │   │   │   │   ├── neighborhood.service.ts
-│   │   │   │   │   └── neighborhood.model.ts
-│   │   │   │   ├── parking/
-│   │   │   │   │   ├── parking.routes.ts
-│   │   │   │   │   ├── parking.controller.ts
-│   │   │   │   │   ├── parking.service.ts
-│   │   │   │   │   └── qr.service.ts
-│   │   │   │   └── visitor/
-│   │   │   │       ├── visitor.routes.ts
-│   │   │   │       ├── visitor.controller.ts
-│   │   │   │       └── visitor.service.ts
-│   │   │   ├── sockets/
-│   │   │   │   └── parking.socket.ts
-│   │   │   ├── jobs/                 # node-cron scheduled tasks
-│   │   │   │   ├── expireQRPasses.ts
-│   │   │   │   └── syncAQIData.ts
-│   │   │   ├── utils/
-│   │   │   │   ├── logger.ts
-│   │   │   │   ├── mailer.ts
-│   │   │   │   └── validators.ts
-│   │   │   └── app.ts
-│   │   ├── prisma/
-│   │   │   └── schema.prisma
-│   │   ├── .env.example
-│   │   └── package.json
+├── server/                     # Backend (Model + Controller)
+│   ├── config/
+│   │   └── db.js
 │   │
-│   └── ai-engine/                    # Python FastAPI microservice
-│       ├── app/
-│       │   ├── main.py
-│       │   ├── routers/
-│       │   │   ├── score.py
-│       │   │   └── predict.py
-│       │   ├── models/
-│       │   │   ├── nexscore.py
-│       │   │   └── gap_filler.py
-│       │   └── data/
-│       │       └── weights_config.json
-│       ├── requirements.txt
-│       └── Dockerfile
+│   ├── models/                 # Model layer
+│   │   ├── User.js
+│   │   ├── Neighborhood.js
+│   │   └── Visitor.js
+│   │
+│   ├── controllers/            # Controller logic
+│   │   ├── authController.js
+│   │   ├── neighborhoodController.js
+│   │   └── parkingController.js
+│   │
+│   ├── routes/                 # Routes
+│   │   ├── authRoutes.js
+│   │   ├── neighborhoodRoutes.js
+│   │   └── parkingRoutes.js
+│   │
+│   ├── middleware/
+│   │   └── authMiddleware.js
+│   │
+│   ├── utils/
+│   │   └── generateQR.js
+│   │
+│   ├── data/                   # mock data (VERY USEFUL)
+│   │   └── neighborhoods.js
+│   │
+│   ├── app.js
+│   └── package.json
 │
-├── packages/
-│   └── shared-types/                 # Shared TypeScript interfaces (monorepo)
-│
-├── infrastructure/
-│   ├── docker-compose.yml
-│   ├── docker-compose.prod.yml
-│   └── nginx/
-│       └── nginx.conf
-│
-├── .github/
-│   └── workflows/
-│       ├── ci.yml                    # Lint + test on PRs
-│       └── deploy.yml                # Deploy on main push
-│
-├── .eslintrc.js
-├── .prettierrc
-├── turbo.json                        # Turborepo config (monorepo)
+├── README.md
 └── package.json
 ```
 
