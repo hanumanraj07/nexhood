@@ -68,6 +68,39 @@ const HeroSection = () => {
                 for smarter real estate transitions.
             </motion.p>
 
+            {/* Hero Image integration */}
+            <motion.div
+                variants={itemVariants}
+                style={{
+                    width: '100%',
+                    maxWidth: '1000px',
+                    height: '400px',
+                    borderRadius: '30px',
+                    overflow: 'hidden',
+                    ...neu.raised,
+                    margin: '20px 0',
+                    position: 'relative'
+                }}
+            >
+                <img
+                    src="/src/assets/landingMain.png"
+                    alt="NexHood Preview"
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                    }}
+                />
+                <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'linear-gradient(to bottom, rgba(224,229,236,0) 60%, rgba(224,229,236,0.8) 100%)'
+                }} />
+            </motion.div>
+
             <motion.div
                 variants={itemVariants}
                 style={{ width: '100%', maxWidth: '560px' }}
