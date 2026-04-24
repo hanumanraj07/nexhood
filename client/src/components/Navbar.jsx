@@ -1,9 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link, useNavigate } from 'react-router-dom';
 import { FiBell, FiSettings } from 'react-icons/fi';
 import { neu, N, useNeuState } from '../styles/neumorphism';
 
 const Navbar = () => {
+    const navigate = useNavigate();
     const bellState = useNeuState(neu.iconButton);
     const gearState = useNeuState(neu.iconButton);
     const signState = useNeuState(neu.button);
@@ -21,14 +23,16 @@ const Navbar = () => {
             zIndex: 1000,
             boxShadow: '0 4px 12px #b8bec7, 0 -2px 5px #ffffff'
         }}>
-            <div style={{
-                fontSize: '24px',
-                fontWeight: 900,
-                color: N.teal,
-                cursor: 'pointer'
-            }}>
-                NexHood
-            </div>
+            <Link to="/" style={{ textDecoration: 'none' }}>
+                <div style={{
+                    fontSize: '24px',
+                    fontWeight: 900,
+                    color: N.teal,
+                    cursor: 'pointer'
+                }}>
+                    NexHood
+                </div>
+            </Link>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                 <button
@@ -61,6 +65,7 @@ const Navbar = () => {
                     {...signState}
                     whileHover={{ scale: 1.03 }}
                     whileTap={neu.buttonPressed}
+                    onClick={() => navigate('/signin')}
                     style={{
                         ...signState.style,
                         padding: '8px 22px',
