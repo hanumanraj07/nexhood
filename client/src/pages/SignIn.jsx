@@ -1,15 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
+import { useAuth } from '../context/AuthContext';
 import { neu, N, useNeuState } from '../styles/neumorphism';
 
 const SignIn = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
+
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [role, setRole] = useState('resident');
+
     const emailState = useNeuState(neu.inset);
     const passState = useNeuState(neu.inset);
     const btnState = useNeuState(neu.button);
     const googleBtnState = useNeuState(neu.button);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        login(email || 'demo@nexhood.in', role);
+        navigate('/dashboard');
+    };
+
+    const roles = [
+        { id: 'resident', label: 'Resident' },
+        { id: 'admin', label: 'Admin' },
+        { id: 'guard', label: 'Guard' }
+    ];
 
     return (
         <div style={{
@@ -51,7 +70,37 @@ const SignIn = () => {
                     Log in to your NexHood intelligence portal.
                 </p>
 
-                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {/* Role Selector for Development */}
+                <div style={{
+                    display: 'flex',
+                    gap: '10px',
+                    marginBottom: '30px',
+                    width: '100%'
+                }}>
+                    {roles.map(r => (
+                        <button
+                            key={r.id}
+                            onClick={() => setRole(r.id)}
+                            style={{
+                                flex: 1,
+                                padding: '10px',
+                                borderRadius: '12px',
+                                border: 'none',
+                                background: N.bg,
+                                fontSize: '12px',
+                                fontWeight: 800,
+                                color: role === r.id ? N.teal : N.textMuted,
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                ...(role === r.id ? neu.inset : neu.raised)
+                            }}
+                        >
+                            {r.label}
+                        </button>
+                    ))}
+                </div>
+
+                <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <label style={{ fontSize: '12px', fontWeight: 800, color: N.textMuted, marginLeft: '16px' }}>
                             EMAIL ADDRESS
@@ -59,6 +108,8 @@ const SignIn = () => {
                         <input
                             {...emailState}
                             type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             placeholder="e.g. alex@example.com"
                             style={{
                                 ...emailState.style,
@@ -79,6 +130,8 @@ const SignIn = () => {
                         <input
                             {...passState}
                             type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
                             style={{
                                 ...passState.style,
@@ -94,6 +147,7 @@ const SignIn = () => {
 
                     <motion.button
                         {...btnState}
+                        type="submit"
                         whileHover={{ scale: 1.02 }}
                         whileTap={neu.buttonPressed}
                         style={{
@@ -104,17 +158,20 @@ const SignIn = () => {
                             borderRadius: '16px',
                             fontWeight: 800,
                             fontSize: '16px',
+                            border: 'none',
                             marginTop: '10px'
                         }}
                     >
-                        Sign In
+                        Sign In as {role.charAt(0).toUpperCase() + role.slice(1)}
                     </motion.button>
+                </form>
 
+                <div style={{ width: '100%' }}>
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '15px',
-                        margin: '10px 0'
+                        margin: '20px 0'
                     }}>
                         <div style={{ flex: 1, height: '1px', background: '#d1d9e6' }} />
                         <span style={{ fontSize: '12px', fontWeight: 700, color: N.textMuted }}>OR</span>
@@ -132,10 +189,12 @@ const SignIn = () => {
                             justifyContent: 'center',
                             gap: '12px',
                             padding: '14px',
+                            width: '100%',
                             borderRadius: '16px',
                             fontWeight: 700,
                             fontSize: '15px',
-                            color: N.text
+                            color: N.text,
+                            border: 'none'
                         }}
                     >
                         <FcGoogle size={24} />
