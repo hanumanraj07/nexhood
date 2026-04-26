@@ -1,48 +1,87 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { authService } from '../services/authService';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    // Simulated initial load
-    useEffect(() => {
-        const savedUser = localStorage.getItem('nexhood_user');
-        if (savedUser) {
-            setUser(JSON.parse(savedUser));
-        }
+  const persistSession = (token, nextUser) => {
+    localStorage.setItem('nexhood_token', token);
+    localStorage.setItem('nexhood_user', JSON.stringify(nextUser));
+    setUser(nextUser);
+  };
+
+  const clearSession = () => {
+    localStorage.removeItem('nexhood_token');
+    localStorage.removeItem('nexhood_user');
+    setUser(null);
+  };
+
+  useEffect(() => {
+    const restore = async () => {
+      const token = localStorage.getItem('nexhood_token');
+      if (!token) {
         setLoading(false);
-    }, []);
+        return;
+      }
 
-    const login = (email, role = 'resident') => {
-        // Mock login logic
-        const mockUser = {
-            id: 'usr_' + Math.random().toString(36).substr(2, 9),
-            name: email.split('@')[0],
-            email: email,
-            role: role // 'admin', 'resident', 'guard'
-        };
-        setUser(mockUser);
-        localStorage.setItem('nexhood_user', JSON.stringify(mockUser));
+      try {
+        const { user: profile } = await authService.me();
+        setUser(profile);
+        localStorage.setItem('nexhood_user', JSON.stringify(profile));
+      } catch {
+        clearSession();
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem('nexhood_user');
-    };
+    restore();
+  }, []);
 
-    return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  const login = async (payload) => {
+    const { token, user: nextUser } = await authService.login(payload);
+    persistSession(token, nextUser);
+    return nextUser;
+  };
+
+  const register = async (payload) => {
+    const { token, user: nextUser } = await authService.register(payload);
+    persistSession(token, nextUser);
+    return nextUser;
+  };
+
+  const loginWithGoogle = async (credential) => {
+    const { token, user: nextUser } = await authService.loginWithGoogle(credential);
+    persistSession(token, nextUser);
+    return nextUser;
+  };
+
+  const logout = () => {
+    clearSession();
+  };
+
+  const value = useMemo(
+    () => ({
+      user,
+      loading,
+      login,
+      register,
+      loginWithGoogle,
+      logout,
+    }),
+    [user, loading]
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
