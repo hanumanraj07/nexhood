@@ -3,7 +3,7 @@ import AppShell from '../components/AppShell';
 import StatCard from '../components/StatCard';
 import { adminService } from '../services/adminService';
 import { extractErrorMessage } from '../services/api';
-import { N } from '../styles/neumorphism';
+import { N } from '../styles/theme';
 
 const ResidentsPage = () => {
   const [data, setData] = useState({ residents: [], incidents: [] });
@@ -74,3 +74,8 @@ const ResidentsPage = () => {
 };
 
 export default ResidentsPage;
+
+
+
+
+
