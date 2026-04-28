@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, ResponsiveContainer } from 'recharts';
 import { useInView } from 'react-intersection-observer';
-import { neu, N } from '../styles/neumorphism';
+import { neu, N } from '../styles/theme';
 import { landingData } from '../data/landingData';
 
 const TemporalSection = () => {
@@ -129,3 +129,8 @@ const TemporalSection = () => {
 };
 
 export default TemporalSection;
+
+
+
+
+

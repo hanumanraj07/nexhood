@@ -14,3 +14,5 @@ export const intelligenceService = {
     return data.result;
   },
 };
+
+

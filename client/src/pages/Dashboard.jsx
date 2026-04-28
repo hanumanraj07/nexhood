@@ -12,9 +12,14 @@ import OpsCenterPage from './OpsCenterPage';
 import DocumentsSimulatorPage from './DocumentsSimulatorPage';
 import LocationExplorerPage from './LocationExplorerPage';
 import { useAuth } from '../context/AuthContext';
+import ResidentLocationPrompt from '../components/ResidentLocationPrompt';
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
+
+  if (user?.role === 'resident' && !user?.preferredLocation) {
+    return <ResidentLocationPrompt onSaved={updateUser} />;
+  }
 
   return (
     <Routes>
@@ -35,3 +40,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+

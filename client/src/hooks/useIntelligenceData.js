@@ -31,3 +31,5 @@ const useIntelligenceData = () => {
 };
 
 export default useIntelligenceData;
+
+

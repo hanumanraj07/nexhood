@@ -1,18 +1,21 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
+  FiActivity,
+  FiBookOpen,
+  FiCompass,
   FiCpu,
   FiLogOut,
   FiMap,
+  FiMapPin,
   FiPieChart,
-  FiSearch,
   FiShield,
+  FiTarget,
   FiTruck,
   FiUsers,
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-import { neu, N } from '../styles/neumorphism';
+import { neu, N } from '../styles/theme';
 
 const Sidebar = ({ compact = false }) => {
   const { user, logout } = useAuth();
@@ -27,22 +30,22 @@ const Sidebar = ({ compact = false }) => {
     resident: [
       { id: 'dashboard', label: 'Overview', icon: <FiPieChart />, path: '/dashboard' },
       { id: 'intelligence', label: 'Lab', icon: <FiCpu />, path: '/dashboard/intelligence' },
-      { id: 'match-studio', label: 'Match Studio', icon: <FiCpu />, path: '/dashboard/match-studio' },
-      { id: 'risk-command', label: 'Risk Command', icon: <FiCpu />, path: '/dashboard/risk-command' },
-      { id: 'ops-center', label: 'Ops Center', icon: <FiCpu />, path: '/dashboard/ops-center' },
-      { id: 'docs-simulator', label: 'Docs + Sim', icon: <FiCpu />, path: '/dashboard/docs-simulator' },
-      { id: 'location-explorer', label: 'Location Finder', icon: <FiSearch />, path: '/dashboard/location-explorer' },
+      { id: 'match-studio', label: 'Match Studio', icon: <FiTarget />, path: '/dashboard/match-studio' },
+      { id: 'risk-command', label: 'Risk Command', icon: <FiActivity />, path: '/dashboard/risk-command' },
+      { id: 'ops-center', label: 'Ops Center', icon: <FiCompass />, path: '/dashboard/ops-center' },
+      { id: 'docs-simulator', label: 'Docs + Sim', icon: <FiBookOpen />, path: '/dashboard/docs-simulator' },
+      { id: 'location-explorer', label: 'Location Explorer', icon: <FiMapPin />, path: '/dashboard/location-explorer' },
       { id: 'neighborhood', label: 'Neighborhood', icon: <FiMap />, path: '/dashboard/neighborhood' },
       { id: 'parking', label: 'My Parking', icon: <FiTruck />, path: '/dashboard/parking' },
     ],
     admin: [
       { id: 'dashboard', label: 'Admin Panel', icon: <FiPieChart />, path: '/dashboard' },
       { id: 'intelligence', label: 'Lab', icon: <FiCpu />, path: '/dashboard/intelligence' },
-      { id: 'match-studio', label: 'Match Studio', icon: <FiCpu />, path: '/dashboard/match-studio' },
-      { id: 'risk-command', label: 'Risk Command', icon: <FiCpu />, path: '/dashboard/risk-command' },
-      { id: 'ops-center', label: 'Ops Center', icon: <FiCpu />, path: '/dashboard/ops-center' },
-      { id: 'docs-simulator', label: 'Docs + Sim', icon: <FiCpu />, path: '/dashboard/docs-simulator' },
-      { id: 'location-explorer', label: 'Location Finder', icon: <FiSearch />, path: '/dashboard/location-explorer' },
+      { id: 'match-studio', label: 'Match Studio', icon: <FiTarget />, path: '/dashboard/match-studio' },
+      { id: 'risk-command', label: 'Risk Command', icon: <FiActivity />, path: '/dashboard/risk-command' },
+      { id: 'ops-center', label: 'Ops Center', icon: <FiCompass />, path: '/dashboard/ops-center' },
+      { id: 'docs-simulator', label: 'Docs + Sim', icon: <FiBookOpen />, path: '/dashboard/docs-simulator' },
+      { id: 'location-explorer', label: 'Location Explorer', icon: <FiMapPin />, path: '/dashboard/location-explorer' },
       { id: 'residents', label: 'Residents', icon: <FiUsers />, path: '/dashboard/residents' },
       { id: 'neighborhood', label: 'Neighborhoods', icon: <FiMap />, path: '/dashboard/neighborhood' },
       { id: 'parking', label: 'Society Parking', icon: <FiTruck />, path: '/dashboard/parking' },
@@ -50,9 +53,9 @@ const Sidebar = ({ compact = false }) => {
     guard: [
       { id: 'dashboard', label: 'Status', icon: <FiPieChart />, path: '/dashboard' },
       { id: 'intelligence', label: 'Lab', icon: <FiCpu />, path: '/dashboard/intelligence' },
-      { id: 'risk-command', label: 'Risk Command', icon: <FiCpu />, path: '/dashboard/risk-command' },
-      { id: 'ops-center', label: 'Ops Center', icon: <FiCpu />, path: '/dashboard/ops-center' },
-      { id: 'location-explorer', label: 'Location Finder', icon: <FiSearch />, path: '/dashboard/location-explorer' },
+      { id: 'risk-command', label: 'Risk Command', icon: <FiActivity />, path: '/dashboard/risk-command' },
+      { id: 'ops-center', label: 'Ops Center', icon: <FiCompass />, path: '/dashboard/ops-center' },
+      { id: 'location-explorer', label: 'Location Explorer', icon: <FiMapPin />, path: '/dashboard/location-explorer' },
       { id: 'guard', label: 'QR Scanner', icon: <FiShield />, path: '/dashboard/guard' },
       { id: 'parking', label: 'Slots', icon: <FiTruck />, path: '/dashboard/parking' },
     ],
@@ -124,9 +127,7 @@ const Sidebar = ({ compact = false }) => {
         </nav>
       </div>
 
-      <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+      <button
         onClick={handleLogout}
         style={{
           display: 'flex',
@@ -146,9 +147,14 @@ const Sidebar = ({ compact = false }) => {
       >
         <FiLogOut />
         Sign Out
-      </motion.button>
+      </button>
     </aside>
   );
 };
 
 export default Sidebar;
+
+
+
+
+

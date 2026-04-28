@@ -16,6 +16,18 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
 
+const distanceKm = (a, b) => {
+  const toRad = (value) => (value * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const p =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  return 6371 * 2 * Math.atan2(Math.sqrt(p), Math.sqrt(1 - p));
+};
+
 const getAllowedOrigins = () => {
   const raw = [
     process.env.CLIENT_URL,
@@ -56,7 +68,23 @@ app.get('/api/health', async (_req, res) => {
 app.get('/api/dashboard/overview', requireAuth, async (req, res) => {
   const db = await readDb();
   const activePasses = db.passes.filter((pass) => pass.status === 'active');
-  const userNeighborhood = db.neighborhoods[0];
+  const baseNeighborhood = db.neighborhoods[0];
+  const userLocation = req.user.preferredLocation;
+
+  const userNeighborhood =
+    userLocation && Number.isFinite(userLocation.latitude) && Number.isFinite(userLocation.longitude)
+      ? [...db.neighborhoods].sort((left, right) => {
+          const leftDistance = distanceKm(
+            { lat: userLocation.latitude, lng: userLocation.longitude },
+            left.coordinates
+          );
+          const rightDistance = distanceKm(
+            { lat: userLocation.latitude, lng: userLocation.longitude },
+            right.coordinates
+          );
+          return leftDistance - rightDistance;
+        })[0] || baseNeighborhood
+      : baseNeighborhood;
   const userPasses = db.passes.filter((pass) => pass.residentId === req.user.id);
 
   res.json({
@@ -70,13 +98,16 @@ app.get('/api/dashboard/overview', requireAuth, async (req, res) => {
       occupiedGuestSlots: db.society.guestSlots.filter((slot) => slot.status === 'occupied').length,
       incidents: db.incidents.length,
       featuredNeighborhood: userNeighborhood,
+      residentPreferredLocation: userLocation || null,
     },
   });
 });
 
 app.use('/api/auth', authRoutes);
 app.use('/api/neighborhoods', neighborhoodRoutes);
+app.use('/api/neighborhood-data', neighborhoodRoutes);
 app.use('/api/parking', parkingRoutes);
+app.use('/api', parkingRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/intelligence', intelligenceRoutes);
 

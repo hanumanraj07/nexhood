@@ -16,7 +16,11 @@ router.get('/', async (_req, res) => {
 });
 
 router.post('/compare', async (req, res) => {
-  const { localityIds = [] } = req.body;
+  const localityIds = Array.isArray(req.body?.localityIds)
+    ? req.body.localityIds
+    : Array.isArray(req.body?.locality_ids)
+      ? req.body.locality_ids
+      : [];
   const db = await readDb();
   const neighborhoods = await attachLiveAqiToMany(
     db.neighborhoods.filter((entry) => localityIds.includes(entry.id))
@@ -111,6 +115,7 @@ router.get('/explore', async (req, res) => {
       latitude: location.latitude,
       longitude: location.longitude,
       radiusMeters,
+      areaHint: location.displayName,
     }),
   ]);
 

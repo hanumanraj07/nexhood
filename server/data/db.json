@@ -611,7 +611,13 @@
       "apartment": "B-402",
       "societyId": "society-greens",
       "authProvider": "local",
-      "createdAt": "2026-04-25T16:03:57.669Z"
+      "createdAt": "2026-04-25T16:03:57.669Z",
+      "preferredLocation": {
+        "displayName": "Kalol, Kalol Taluka, Gandhinagar, Gujarat, 382700, India",
+        "latitude": 23.2452165,
+        "longitude": 72.4966223,
+        "updatedAt": "2026-04-28T11:08:20.451Z"
+      }
     },
     {
       "id": "user-guard-1",

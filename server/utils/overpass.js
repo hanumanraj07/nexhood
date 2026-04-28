@@ -140,6 +140,11 @@ const fetchWikimediaImagePool = async (lat, lng) => {
 
 const sanitizeText = (value) => String(value || '').replace(/[^\w\s-]/g, ' ').replace(/\s+/g, ' ').trim();
 
+const deterministicFallbackImage = (seed) => {
+  const cleanSeed = encodeURIComponent(String(seed || 'nexhood-location'));
+  return `https://picsum.photos/seed/${cleanSeed}/640/400`;
+};
+
 const fetchWikimediaImageBySearch = async ({ name, categoryKey, areaHint }) => {
   const cleanName = sanitizeText(name);
   if (!cleanName || cleanName.toLowerCase().includes('unnamed')) {
@@ -217,7 +222,10 @@ const enrichEntriesWithRealImages = async ({ entries, categoryKey, areaHint }) =
       categoryKey,
       areaHint,
     });
-    return { ...entry, image: image || null };
+    return {
+      ...entry,
+      image: image || deterministicFallbackImage(`${categoryKey}-${entry.id}-${entry.name}`),
+    };
   });
   return Promise.all(lookups);
 };
@@ -365,6 +373,23 @@ const formatProperties = ({ elements = [] }) => {
   return rows;
 };
 
+const enrichPropertiesWithRealImages = async ({ properties, areaHint }) => {
+  const target = properties.slice(0, 16);
+  const lookups = target.map(async (property) => {
+    if (property.image) return property;
+    const image = await fetchWikimediaImageBySearch({
+      name: property.name,
+      categoryKey: 'shops',
+      areaHint,
+    });
+    return {
+      ...property,
+      image: image || deterministicFallbackImage(`property-${property.id}-${property.name}`),
+    };
+  });
+  return Promise.all(lookups);
+};
+
 const getNearbyAmenities = async ({ latitude, longitude, areaHint = '' }) => {
   const cacheKey = getCacheKey({ latitude, longitude });
   const cached = amenitiesCache.get(cacheKey);
@@ -404,7 +429,7 @@ const getNearbyAmenities = async ({ latitude, longitude, areaHint = '' }) => {
   }
 };
 
-const getNearbyProperties = async ({ latitude, longitude, radiusMeters = SEARCH_RADIUS_METERS }) => {
+const getNearbyProperties = async ({ latitude, longitude, radiusMeters = SEARCH_RADIUS_METERS, areaHint = '' }) => {
   const cacheKey = getCacheKey({ latitude, longitude, radiusMeters });
   const cached = propertyCache.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) {
@@ -417,8 +442,12 @@ const getNearbyProperties = async ({ latitude, longitude, radiusMeters = SEARCH_
     const query = buildPropertyQuery(latitude, longitude, radiusMeters);
     const elements = await fetchOverpass(query);
     const properties = formatProperties({ elements });
-    const value = {
+    const enrichedProperties = await enrichPropertiesWithRealImages({
       properties,
+      areaHint,
+    });
+    const value = {
+      properties: enrichedProperties,
       radiusMeters,
       source: 'OpenStreetMap Overpass',
       realData: true,

@@ -8,6 +8,24 @@
 
 :root {
   --nh-bg: #e0e5ec;
+  --nh-shadow-raised: 8px 8px 16px #b8bec7, -8px -8px 16px #ffffff;
+  --nh-shadow-raised-sm: 4px 4px 10px #b8bec7, -4px -4px 10px #ffffff;
+  --nh-shadow-raised-lg: 12px 12px 24px #b8bec7, -12px -12px 24px #ffffff;
+  --nh-shadow-inset: inset 4px 4px 10px #b8bec7, inset -4px -4px 10px #ffffff;
+  --nh-shadow-inset-deep: inset 6px 6px 14px #b8bec7, inset -6px -6px 14px #ffffff;
+  --nh-shadow-card-dark: 8px 8px 20px #a8aeb7, -4px -4px 12px #ffffff;
+  --nh-shadow-button: 6px 6px 14px #b8bec7, -2px -2px 8px #ffffff, 0 4px 14px rgba(42,157,143,0.35);
+  --nh-shadow-button-pressed: inset 4px 4px 10px rgba(0,0,0,0.15), inset -2px -2px 6px rgba(255,255,255,0.1);
+  --nh-shadow-searchbar: inset 6px 6px 14px #b8bec7, inset -6px -6px 14px #ffffff;
+  --nh-teal: #2a9d8f;
+  --nh-teal-dark: #1e7268;
+  --nh-teal-deep: #264653;
+  --nh-teal-glow: rgba(42, 157, 143, 0.35);
+  --nh-text: #4a5568;
+  --nh-text-light: #718096;
+  --nh-text-muted: #a0aec0;
+  --nh-text-white: #ffffff;
+  --nh-text-teal-light: #7ee8dc;
   --nh-panel: rgba(255, 255, 255, 0.36);
   --nh-line: rgba(38, 70, 83, 0.08);
   --nh-accent: rgba(42, 157, 143, 0.2);
@@ -41,7 +59,6 @@ body::before {
       rgba(38, 70, 83, 0.035) 77px,
       transparent 78px
     );
-  animation: backgroundShift 18s linear infinite;
 }
 
 #root {
@@ -92,7 +109,6 @@ select {
       transparent 48px
     );
   opacity: 0.9;
-  animation: panelSweep 14s ease-in-out infinite;
 }
 
 .ambient-grid::after {
@@ -114,12 +130,11 @@ select {
 }
 
 .soft-float {
-  animation: softFloat 7s ease-in-out infinite;
+  animation: none;
 }
 
 .soft-float-delay {
-  animation: softFloat 9s ease-in-out infinite;
-  animation-delay: 1.2s;
+  animation: none;
 }
 
 .pulse-line {
@@ -135,7 +150,7 @@ select {
   height: 4px;
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(42, 157, 143, 0.95), rgba(42, 157, 143, 0.15));
-  animation: pulseWidth 3.4s ease-in-out infinite;
+  animation: none;
 }
 
 .hero-stage {
@@ -157,7 +172,7 @@ select {
       rgba(38, 70, 83, 0.05) 53px,
       transparent 54px
     );
-  animation: dataScan 10s linear infinite;
+  animation: none;
 }
 
 @keyframes backgroundShift {

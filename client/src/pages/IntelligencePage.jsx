@@ -20,7 +20,7 @@ import AppShell from '../components/AppShell';
 import StatCard from '../components/StatCard';
 import { intelligenceService } from '../services/intelligenceService';
 import { extractErrorMessage } from '../services/api';
-import { N } from '../styles/neumorphism';
+import { N } from '../styles/theme';
 
 const panelStyle = {
   padding: '22px',
@@ -555,3 +555,8 @@ const simulateButtonStyle = {
 };
 
 export default IntelligencePage;
+
+
+
+
+

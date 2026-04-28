@@ -1,8 +1,8 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiBell, FiSettings } from 'react-icons/fi';
-import { neu, N, useNeuState } from '../styles/neumorphism';
+import { neu, N } from '../styles/theme';
+import { useNeuState } from '../hooks/useNeuState';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -14,28 +14,44 @@ const Navbar = () => {
     <nav
       style={{
         position: 'sticky',
-        top: 0,
-        height: '60px',
-        background: 'rgba(224,229,236,0.88)',
-        backdropFilter: 'blur(10px)',
+        top: '16px',
+        height: '72px',
+        borderRadius: '18px',
+        margin: '12px 20px 0',
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.88), rgba(224,229,236,0.92))',
+        backdropFilter: 'blur(12px)',
+        border: '1px solid rgba(255,255,255,0.7)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 48px',
+        padding: '0 22px',
         zIndex: 1000,
-        boxShadow: '0 4px 12px #b8bec7, 0 -2px 5px #ffffff',
+        boxShadow: '10px 10px 24px rgba(184,190,199,0.8), -8px -8px 20px rgba(255,255,255,0.9)',
       }}
     >
       <Link to="/" style={{ textDecoration: 'none' }}>
-        <div
-          style={{
-            fontSize: '24px',
-            fontWeight: 900,
-            color: N.teal,
-            cursor: 'pointer',
-          }}
-        >
-          NexHood
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+          <div
+            style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '12px',
+              background: 'linear-gradient(145deg, #2a9d8f, #1f756b)',
+              color: '#fff',
+              fontWeight: 900,
+              display: 'grid',
+              placeItems: 'center',
+              boxShadow: '0 8px 16px rgba(42,157,143,0.3)',
+            }}
+          >
+            N
+          </div>
+          <div>
+            <div style={{ fontSize: '21px', fontWeight: 900, color: N.tealDeep, lineHeight: 1 }}>NexHood</div>
+            <div style={{ fontSize: '11px', letterSpacing: '0.06em', color: N.textLight, textTransform: 'uppercase' }}>
+              Civic Intelligence
+            </div>
+          </div>
         </div>
       </Link>
 
@@ -66,10 +82,8 @@ const Navbar = () => {
           <FiSettings />
         </button>
 
-        <motion.button
+        <button
           {...signState}
-          whileHover={{ scale: 1.03 }}
-          whileTap={neu.buttonPressed}
           onClick={() => navigate('/signin')}
           style={{
             ...signState.style,
@@ -77,10 +91,15 @@ const Navbar = () => {
           }}
         >
           Sign In
-        </motion.button>
+        </button>
       </div>
     </nav>
   );
 };
 
 export default Navbar;
+
+
+
+
+

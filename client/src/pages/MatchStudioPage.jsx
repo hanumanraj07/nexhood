@@ -3,7 +3,7 @@ import { BrainCircuit, Building2, Users } from 'lucide-react';
 import AppShell from '../components/AppShell';
 import StatCard from '../components/StatCard';
 import useIntelligenceData from '../hooks/useIntelligenceData';
-import { N } from '../styles/neumorphism';
+import { N } from '../styles/theme';
 
 const lifestyleLabels = {
   family: 'Family-first',
@@ -135,3 +135,8 @@ const MatchStudioPage = () => {
 };
 
 export default MatchStudioPage;
+
+
+
+
+

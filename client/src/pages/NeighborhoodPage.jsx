@@ -19,7 +19,8 @@ import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
 import AppShell from '../components/AppShell';
 import { neighborhoodService } from '../services/neighborhoodService';
 import { extractErrorMessage } from '../services/api';
-import { N } from '../styles/neumorphism';
+import { N } from '../styles/theme';
+import { useAuth } from '../context/AuthContext';
 
 const scoreKeys = [
   { key: 'education', label: 'Education' },
@@ -36,7 +37,79 @@ const markerColor = (score) => {
   return '#d64545';
 };
 
+const clampScore = (value) => Math.max(40, Math.min(95, Math.round(value)));
+
+const buildDynamicNeighborhoodFromExplore = (exploreResponse, preferredLocation) => {
+  const summary = exploreResponse?.nearbyAmenities?.summary || {};
+  const properties = exploreResponse?.properties || [];
+  const totalAmenities = Object.values(summary).reduce((acc, value) => acc + Number(value || 0), 0);
+  const schools = Number(summary.schools || 0);
+  const hospitals = Number(summary.hospitals || 0);
+  const parks = Number(summary.parks || 0);
+  const restaurants = Number(summary.restaurants || 0);
+
+  const education = clampScore(55 + schools * 3.5);
+  const safety = clampScore(58 + hospitals * 2 + parks * 1.5);
+  const environment = clampScore(50 + parks * 4);
+  const waterUtilities = clampScore(60 + Math.min(10, properties.length));
+  const infrastructure = clampScore(54 + restaurants * 1.5 + Number(summary.banks || 0) * 2);
+  const growthPotential = clampScore(56 + Math.min(16, properties.length * 1.8 + totalAmenities * 0.35));
+  const nexScore = clampScore((education + safety + environment + waterUtilities + infrastructure + growthPotential) / 6);
+
+  return {
+    id: 'preferred-live',
+    name: 'Your Selected Area',
+    city: preferredLocation?.displayName?.split(',').slice(-2).join(',').trim() || 'Custom',
+    pincode: '--',
+    coordinates: exploreResponse?.location?.coordinates || {
+      lat: preferredLocation?.latitude,
+      lng: preferredLocation?.longitude,
+    },
+    nexScore,
+    confidence: 'live',
+    summary: `Live profile generated from nearby places around ${exploreResponse?.location?.displayName || preferredLocation?.displayName}.`,
+    tags: ['location-based', 'live nearby data', 'personalized'],
+    subScores: {
+      education,
+      safety,
+      environment,
+      waterUtilities,
+      infrastructure,
+      growthPotential,
+    },
+    metrics: {
+      schoolsNearby: schools,
+      averageRent: properties.length ? Math.round(properties.reduce((sum, item) => sum + Number(item.priceEstimate || 0), 0) / properties.length / 280) : 0,
+      greenCover: Math.min(45, parks * 3),
+      averageAqi: 95,
+      monthlyPowerCuts: 1.8,
+      waterReliability: waterUtilities,
+    },
+    aqiTrend: [
+      { month: 'Jan', value: 96 },
+      { month: 'Feb', value: 94 },
+      { month: 'Mar', value: 98 },
+      { month: 'Apr', value: 101 },
+      { month: 'May', value: 99 },
+      { month: 'Jun', value: 95 },
+    ],
+    utilities: {
+      waterSupply: 'Estimated from nearby live signals.',
+      power: 'Estimated from locality profile.',
+    },
+    infrastructureProjects: [
+      {
+        title: `Nearby mapped amenities: ${totalAmenities}`,
+        eta: 'Live',
+        impact: 'Medium',
+      },
+    ],
+    nearbyAmenities: exploreResponse?.nearbyAmenities || null,
+  };
+};
+
 const NeighborhoodPage = () => {
+  const { user } = useAuth();
   const [neighborhoods, setNeighborhoods] = useState([]);
   const [selected, setSelected] = useState([]);
   const [details, setDetails] = useState({});
@@ -46,15 +119,55 @@ const NeighborhoodPage = () => {
     const load = async () => {
       try {
         const result = await neighborhoodService.list();
-        setNeighborhoods(result);
-        setSelected(result.slice(0, 2).map((item) => item.id));
+        const preferred = user?.preferredLocation;
+        let dynamicArea = null;
+
+        if (preferred) {
+          try {
+            const explore = await neighborhoodService.exploreLocation({
+              query: preferred.displayName,
+              lat: preferred.latitude,
+              lng: preferred.longitude,
+              radiusMeters: 3000,
+            });
+            dynamicArea = buildDynamicNeighborhoodFromExplore(explore, preferred);
+          } catch {
+            dynamicArea = null;
+          }
+        }
+
+        const sorted = preferred
+          ? [...result].sort((left, right) => {
+              const leftDistance = Math.hypot(
+                left.coordinates.lat - preferred.latitude,
+                left.coordinates.lng - preferred.longitude
+              );
+              const rightDistance = Math.hypot(
+                right.coordinates.lat - preferred.latitude,
+                right.coordinates.lng - preferred.longitude
+              );
+              return leftDistance - rightDistance;
+            })
+          : result;
+        const merged = dynamicArea ? [dynamicArea, ...sorted] : sorted;
+        setNeighborhoods(merged);
+        setSelected(merged.slice(0, 2).map((item) => item.id));
+        if (dynamicArea?.nearbyAmenities) {
+          setDetails((current) => ({
+            ...current,
+            [dynamicArea.id]: {
+              ...dynamicArea,
+              nearbyAmenities: dynamicArea.nearbyAmenities,
+            },
+          }));
+        }
       } catch (err) {
         setError(extractErrorMessage(err));
       }
     };
 
     load();
-  }, []);
+  }, [user?.preferredLocation]);
 
   useEffect(() => {
     const loadDetails = async () => {
@@ -64,6 +177,9 @@ const NeighborhoodPage = () => {
 
         const enriched = await Promise.all(
           missingIds.map(async (id) => {
+            if (id === 'preferred-live') {
+              return [id, details[id] || null];
+            }
             const neighborhood = await neighborhoodService.getDetails(id);
             return [id, neighborhood];
           })
@@ -71,7 +187,7 @@ const NeighborhoodPage = () => {
 
         setDetails((current) => ({
           ...current,
-          ...Object.fromEntries(enriched),
+          ...Object.fromEntries(enriched.filter((entry) => entry[1])),
         }));
       } catch (err) {
         setError(extractErrorMessage(err));
@@ -350,3 +466,8 @@ const NeighborhoodPage = () => {
 };
 
 export default NeighborhoodPage;
+
+
+
+
+

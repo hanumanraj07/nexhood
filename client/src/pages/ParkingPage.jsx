@@ -3,7 +3,7 @@ import AppShell from '../components/AppShell';
 import { parkingService } from '../services/parkingService';
 import { extractErrorMessage } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { N } from '../styles/neumorphism';
+import { N } from '../styles/theme';
 
 const initialForm = {
   visitorName: '',
@@ -40,6 +40,12 @@ const ParkingPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    window.setTimeout(() => setToast(null), 2600);
+  };
 
   const load = async () => {
     try {
@@ -66,13 +72,27 @@ const ParkingPage = () => {
         hostApartment: form.hostApartment || user?.apartment,
       });
       setSuccess(`Pass created for ${created.visitorName} in slot ${created.slotAssigned}.`);
+      showToast('success', `Pass generated for ${created.visitorName}`);
       setForm(initialForm);
       await load();
     } catch (err) {
-      setError(extractErrorMessage(err));
+      const message = extractErrorMessage(err);
+      setError(message);
+      showToast('error', message);
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const downloadQr = (pass) => {
+    if (!pass?.qrCode) return;
+    const link = document.createElement('a');
+    link.href = pass.qrCode;
+    link.download = `nexhood-qr-${pass.id}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('success', 'QR downloaded');
   };
 
   const canCreate = user?.role === 'resident' || user?.role === 'admin';
@@ -84,6 +104,24 @@ const ParkingPage = () => {
     >
       {error ? <div style={{ color: '#d64545', marginBottom: '14px' }}>{error}</div> : null}
       {success ? <div style={{ color: N.tealDark, marginBottom: '14px' }}>{success}</div> : null}
+      {toast ? (
+        <div
+          style={{
+            position: 'fixed',
+            right: '22px',
+            top: '20px',
+            zIndex: 1200,
+            padding: '12px 16px',
+            borderRadius: '14px',
+            background: toast.type === 'success' ? '#edf7f4' : '#fff2eb',
+            color: toast.type === 'success' ? N.tealDark : '#b85c38',
+            fontWeight: 800,
+            boxShadow: '10px 10px 20px rgba(184,190,199,0.75), -8px -8px 18px rgba(255,255,255,0.8)',
+          }}
+        >
+          {toast.message}
+        </div>
+      ) : null}
 
       <div style={{ display: 'grid', gridTemplateColumns: canCreate ? '1.15fr 1fr' : '1fr', gap: '18px' }}>
         {canCreate ? (
@@ -148,7 +186,49 @@ const ParkingPage = () => {
               </div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              {pass.qrCode ? <img src={pass.qrCode} alt={`QR for ${pass.visitorName}`} style={{ width: '160px', height: '160px', objectFit: 'contain', borderRadius: '20px' }} /> : null}
+              {pass.qrCode ? (
+                <>
+                  <div
+                    style={{
+                      width: '176px',
+                      height: '176px',
+                      margin: '0 auto',
+                      background: '#ffffff',
+                      borderRadius: '0',
+                      padding: '8px',
+                      boxShadow: 'inset 2px 2px 5px rgba(38,70,83,0.14), inset -2px -2px 5px rgba(255,255,255,0.8)',
+                    }}
+                  >
+                    <img
+                      src={pass.qrCode}
+                      alt={`QR for ${pass.visitorName}`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        borderRadius: '0',
+                        imageRendering: 'pixelated',
+                        display: 'block',
+                      }}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => downloadQr(pass)}
+                    style={{
+                      marginTop: '10px',
+                      width: '176px',
+                      padding: '9px 12px',
+                      borderRadius: '12px',
+                      background: '#edf7f4',
+                      color: N.tealDark,
+                      fontWeight: 800,
+                    }}
+                  >
+                    Download QR
+                  </button>
+                </>
+              ) : null}
             </div>
           </div>
         ))}
@@ -158,3 +238,8 @@ const ParkingPage = () => {
 };
 
 export default ParkingPage;
+
+
+
+
+

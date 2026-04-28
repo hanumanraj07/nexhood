@@ -3,7 +3,7 @@ import { CarFront, Clock3, Gauge, Users } from 'lucide-react';
 import AppShell from '../components/AppShell';
 import StatCard from '../components/StatCard';
 import useIntelligenceData from '../hooks/useIntelligenceData';
-import { N } from '../styles/neumorphism';
+import { N } from '../styles/theme';
 
 const panelStyle = {
   padding: '22px',
@@ -137,3 +137,8 @@ const OpsCenterPage = () => {
 };
 
 export default OpsCenterPage;
+
+
+
+
+

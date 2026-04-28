@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { N } from '../styles/neumorphism';
+import { N } from '../styles/theme';
 
 const StatCard = ({ label, value, tone = 'default', hint }) => {
   const toneColor =
@@ -46,3 +46,8 @@ const StatCard = ({ label, value, tone = 'default', hint }) => {
 };
 
 export default StatCard;
+
+
+
+
+

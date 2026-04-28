@@ -40,6 +40,7 @@ router.post('/register', async (req, res) => {
       apartment: apartment?.trim() || 'Unassigned',
       societyId: db.society.id,
       authProvider: 'local',
+      preferredLocation: null,
       createdAt: new Date().toISOString(),
     };
 
@@ -107,6 +108,7 @@ router.post('/google', async (req, res) => {
         authProvider: 'google',
         googleId: payload.sub,
         avatar: payload.picture,
+        preferredLocation: null,
         createdAt: new Date().toISOString(),
       };
       db.users.push(user);
@@ -132,6 +134,40 @@ router.get('/me', requireAuth, async (req, res) => {
   res.json({
     success: true,
     user: sanitizeUser(req.user),
+  });
+});
+
+router.put('/location', requireAuth, async (req, res) => {
+  const { displayName, latitude, longitude } = req.body || {};
+  const lat = Number(latitude);
+  const lng = Number(longitude);
+  const name = String(displayName || '').trim();
+
+  if (!name || !Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return res.status(400).json({
+      success: false,
+      message: 'displayName, latitude, and longitude are required.',
+    });
+  }
+
+  const db = await readDb();
+  const user = db.users.find((entry) => entry.id === req.user.id);
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'User not found.' });
+  }
+
+  user.preferredLocation = {
+    displayName: name,
+    latitude: lat,
+    longitude: lng,
+    updatedAt: new Date().toISOString(),
+  };
+
+  await writeDb(db);
+
+  return res.json({
+    success: true,
+    user: sanitizeUser(user),
   });
 });
 

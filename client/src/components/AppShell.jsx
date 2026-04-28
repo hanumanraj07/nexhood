@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import Sidebar from './Sidebar';
-import { N } from '../styles/neumorphism';
+import { N } from '../styles/theme';
+import { useAuth } from '../context/AuthContext';
+import ChangeLocationModal from './ChangeLocationModal';
 
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 980);
@@ -17,6 +18,11 @@ const useIsMobile = () => {
 
 const AppShell = ({ title, subtitle, children, actions }) => {
   const isMobile = useIsMobile();
+  const { user, updateUser } = useAuth();
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const role = String(user?.role || 'guest');
+  const roleTone =
+    role === 'admin' ? { bg: '#ffe9db', color: '#b85c38' } : role === 'guard' ? { bg: '#e7f0ff', color: '#3567b8' } : { bg: '#edf7f4', color: N.tealDark };
 
   return (
     <div
@@ -32,10 +38,7 @@ const AppShell = ({ title, subtitle, children, actions }) => {
     >
       <Sidebar compact={isMobile} />
       <main style={{ minWidth: 0 }}>
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: 'easeOut' }}
+        <section
           className="dashboard-panel"
           style={{
             background:
@@ -58,27 +61,66 @@ const AppShell = ({ title, subtitle, children, actions }) => {
             }}
           >
             <div>
-              <h1
-                className="pulse-line"
-                style={{
-                  fontSize: isMobile ? '28px' : '34px',
-                  fontWeight: 900,
-                  color: N.teal,
-                }}
-              >
+              <h1 style={{ fontSize: isMobile ? '28px' : '34px', fontWeight: 900, color: N.teal }}>
                 {title}
               </h1>
               <p style={{ marginTop: '10px', color: N.textLight, maxWidth: '760px', lineHeight: 1.6 }}>
                 {subtitle}
               </p>
             </div>
-            {actions}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '999px',
+                  background: roleTone.bg,
+                  color: roleTone.color,
+                  fontWeight: 800,
+                  fontSize: '12px',
+                  textTransform: 'capitalize',
+                }}
+              >
+                Role: {role}
+              </div>
+              {role === 'resident' ? (
+                <button
+                  type="button"
+                  onClick={() => setShowLocationModal(true)}
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: '999px',
+                    background: 'rgba(255,255,255,0.62)',
+                    color: N.tealDeep,
+                    fontWeight: 800,
+                    fontSize: '12px',
+                  }}
+                >
+                  Change Location
+                </button>
+              ) : null}
+              {actions}
+            </div>
           </div>
           {children}
-        </motion.section>
+        </section>
       </main>
+      {showLocationModal ? (
+        <ChangeLocationModal
+          initialLocation={user?.preferredLocation}
+          onClose={() => setShowLocationModal(false)}
+          onSaved={(nextUser) => {
+            updateUser(nextUser);
+            setShowLocationModal(false);
+          }}
+        />
+      ) : null}
     </div>
   );
 };
 
 export default AppShell;
+
+
+
+
+

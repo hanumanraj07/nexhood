@@ -251,3 +251,5 @@ const StyledWrapper = styled.div`
 `;
 
 export default Loader;
+
+

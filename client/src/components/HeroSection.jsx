@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FiMapPin } from 'react-icons/fi';
-import { neu, N, useNeuState } from '../styles/neumorphism';
+import { neu, N } from '../styles/theme';
+import { useNeuState } from '../hooks/useNeuState';
 
 const HeroSection = () => {
   const searchBarState = useNeuState(neu.searchBar);
@@ -172,3 +173,8 @@ const HeroSection = () => {
 };
 
 export default HeroSection;
+
+
+
+
+

@@ -39,6 +39,7 @@ const sanitizeUser = (user) => ({
   apartment: user.apartment,
   societyId: user.societyId,
   authProvider: user.authProvider,
+  preferredLocation: user.preferredLocation || null,
 });
 
 module.exports = {

@@ -21,7 +21,7 @@ const syncExpiredPasses = (db) => {
   });
 };
 
-router.get('/slots', requireAuth, async (_req, res) => {
+const getSlotsHandler = async (_req, res) => {
   const db = await readDb();
   syncExpiredPasses(db);
   await writeDb(db);
@@ -46,9 +46,9 @@ router.get('/slots', requireAuth, async (_req, res) => {
     },
     slots,
   });
-});
+};
 
-router.get('/passes', requireAuth, async (req, res) => {
+const getPassesHandler = async (req, res) => {
   const db = await readDb();
   syncExpiredPasses(db);
   await writeDb(db);
@@ -62,9 +62,9 @@ router.get('/passes', requireAuth, async (req, res) => {
     success: true,
     passes: passes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
   });
-});
+};
 
-router.post('/passes', requireAuth, requireRole('resident', 'admin'), async (req, res) => {
+const createPassHandler = async (req, res) => {
   const { visitorName, vehicleNumber, arrivalWindowStart, durationHours, hostApartment } = req.body;
 
   if (!visitorName || !vehicleNumber || !arrivalWindowStart || !durationHours) {
@@ -108,17 +108,18 @@ router.post('/passes', requireAuth, requireRole('resident', 'admin'), async (req
     success: true,
     pass,
   });
-});
+};
 
-router.post('/verify', requireAuth, requireRole('guard', 'admin'), async (req, res) => {
+const verifyPassHandler = async (req, res) => {
   try {
     const { token, scanType = 'entry' } = req.body;
+    const normalizedToken = String(token || '').trim();
 
-    if (!token) {
+    if (!normalizedToken) {
       return res.status(400).json({ success: false, message: 'Scan token is required.' });
     }
 
-    const payload = verifyToken(token);
+    const payload = verifyToken(normalizedToken);
     if (payload.type !== 'visitor_pass') {
       return res.status(400).json({ success: false, message: 'Invalid QR payload.' });
     }
@@ -177,11 +178,12 @@ router.post('/verify', requireAuth, requireRole('guard', 'admin'), async (req, r
   } catch (error) {
     res.status(400).json({ success: false, message: 'Unable to verify this pass.' });
   }
-});
+};
 
-router.patch('/passes/:id/exit', requireAuth, requireRole('guard', 'admin'), async (req, res) => {
+const markExitHandler = async (req, res) => {
   const db = await readDb();
-  const pass = db.passes.find((entry) => entry.id === req.params.id);
+  const passId = req.params.id || req.params.pass_id;
+  const pass = db.passes.find((entry) => entry.id === passId);
 
   if (!pass) {
     return res.status(404).json({ success: false, message: 'Pass not found.' });
@@ -208,6 +210,18 @@ router.patch('/passes/:id/exit', requireAuth, requireRole('guard', 'admin'), asy
     success: true,
     pass,
   });
-});
+};
+
+router.get('/slots', requireAuth, getSlotsHandler);
+router.get('/slots/:society_id', requireAuth, getSlotsHandler);
+router.get('/passes', requireAuth, getPassesHandler);
+router.post('/passes', requireAuth, requireRole('resident', 'admin'), createPassHandler);
+router.post('/verify', requireAuth, requireRole('guard', 'admin'), verifyPassHandler);
+router.patch('/passes/:id/exit', requireAuth, requireRole('guard', 'admin'), markExitHandler);
+
+router.post('/visitor-pass', requireAuth, requireRole('resident', 'admin'), createPassHandler);
+router.post('/verify-qr', requireAuth, requireRole('guard', 'admin'), verifyPassHandler);
+router.patch('/visitor-pass/:id/exit', requireAuth, requireRole('guard', 'admin'), markExitHandler);
+router.patch('/visitor-pass/:pass_id/exit', requireAuth, requireRole('guard', 'admin'), markExitHandler);
 
 module.exports = router;

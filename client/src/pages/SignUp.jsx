@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { neu, N, useNeuState } from '../styles/neumorphism';
+import { neu, N } from '../styles/theme';
+import { useNeuState } from '../hooks/useNeuState';
 import { extractErrorMessage } from '../services/api';
 import GoogleAuthButton from '../components/GoogleAuthButton';
 
@@ -193,3 +194,8 @@ const SignUp = () => {
 };
 
 export default SignUp;
+
+
+
+
+

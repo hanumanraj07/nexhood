@@ -5,7 +5,7 @@ import StatCard from '../components/StatCard';
 import useIntelligenceData from '../hooks/useIntelligenceData';
 import { intelligenceService } from '../services/intelligenceService';
 import { extractErrorMessage } from '../services/api';
-import { N } from '../styles/neumorphism';
+import { N } from '../styles/theme';
 
 const panelStyle = {
   padding: '22px',
@@ -189,3 +189,8 @@ const simulateButtonStyle = {
 };
 
 export default DocumentsSimulatorPage;
+
+
+
+
+

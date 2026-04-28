@@ -3,7 +3,8 @@ import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
 import AppShell from '../components/AppShell';
 import { neighborhoodService } from '../services/neighborhoodService';
 import { extractErrorMessage } from '../services/api';
-import { N } from '../styles/neumorphism';
+import { N } from '../styles/theme';
+import { useAuth } from '../context/AuthContext';
 
 const amenityConfig = [
   { key: 'schools', label: 'Schools' },
@@ -49,6 +50,7 @@ const placeholderStyle = {
 };
 
 const LocationExplorerPage = () => {
+  const { user } = useAuth();
   const [query, setQuery] = useState('');
   const [selectedSuggestion, setSelectedSuggestion] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
@@ -57,6 +59,26 @@ const LocationExplorerPage = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [failedImages, setFailedImages] = useState({});
+
+  const markImageFailed = (key) => {
+    setFailedImages((current) => ({ ...current, [key]: true }));
+  };
+
+  React.useEffect(() => {
+    if (!user?.preferredLocation) return;
+    setQuery((current) =>
+      current.trim().length ? current : user.preferredLocation.displayName
+    );
+    setSelectedSuggestion((current) =>
+      current || {
+        id: 'preferred-location',
+        displayName: user.preferredLocation.displayName,
+        latitude: user.preferredLocation.latitude,
+        longitude: user.preferredLocation.longitude,
+      }
+    );
+  }, [user?.preferredLocation]);
 
   React.useEffect(() => {
     const value = query.trim();
@@ -104,6 +126,7 @@ const LocationExplorerPage = () => {
 
     setLoading(true);
     setError('');
+    setFailedImages({});
     setShowSuggestions(false);
 
     try {
@@ -336,7 +359,16 @@ const LocationExplorerPage = () => {
               }}
             >
               {property.image ? (
-                <img src={property.image} alt={property.name} style={imageStyle} />
+                !failedImages[`property-${property.id}`] ? (
+                  <img
+                    src={property.image}
+                    alt={property.name}
+                    style={imageStyle}
+                    onError={() => markImageFailed(`property-${property.id}`)}
+                  />
+                ) : (
+                  <div style={placeholderStyle}>No verified image for this listing</div>
+                )
               ) : (
                 <div style={placeholderStyle}>No verified image for this listing</div>
               )}
@@ -396,7 +428,16 @@ const LocationExplorerPage = () => {
                   }}
                 >
                   {place.image ? (
-                    <img src={place.image} alt={place.name} style={imageStyle} />
+                    !failedImages[`amenity-${section.key}-${place.id}`] ? (
+                      <img
+                        src={place.image}
+                        alt={place.name}
+                        style={imageStyle}
+                        onError={() => markImageFailed(`amenity-${section.key}-${place.id}`)}
+                      />
+                    ) : (
+                      <div style={placeholderStyle}>No verified image for this place</div>
+                    )
                   ) : (
                     <div style={placeholderStyle}>No verified image for this place</div>
                   )}
@@ -416,3 +457,8 @@ const LocationExplorerPage = () => {
 };
 
 export default LocationExplorerPage;
+
+
+
+
+

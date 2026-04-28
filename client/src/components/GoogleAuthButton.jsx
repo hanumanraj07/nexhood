@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
-import { N } from '../styles/neumorphism';
+import { N } from '../styles/theme';
 
 let initializedClientId = null;
 let credentialCallbackRef = null;
@@ -94,3 +94,8 @@ const GoogleAuthButton = ({ onCredential, text = 'signin_with', label = 'Continu
 };
 
 export default GoogleAuthButton;
+
+
+
+
+

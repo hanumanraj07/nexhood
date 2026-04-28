@@ -22,3 +22,5 @@ export const parkingService = {
     return data.pass;
   },
 };
+
+

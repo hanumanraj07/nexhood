@@ -1,5 +1,5 @@
 import React from 'react';
-import { N } from '../styles/neumorphism';
+import { N } from '../styles/theme';
 
 const Footer = () => {
     return (
@@ -52,3 +52,8 @@ const Footer = () => {
 };
 
 export default Footer;
+
+
+
+
+

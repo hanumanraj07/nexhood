@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { neu, N } from '../styles/neumorphism';
+import { neu, N } from '../styles/theme';
 import { landingData } from '../data/landingData';
 
 const PrecisionSection = () => {
@@ -140,3 +140,8 @@ const PrecisionSection = () => {
 };
 
 export default PrecisionSection;
+
+
+
+
+
