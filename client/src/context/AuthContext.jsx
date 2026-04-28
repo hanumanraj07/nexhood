@@ -63,6 +63,11 @@ export const AuthProvider = ({ children }) => {
     clearSession();
   };
 
+  const updateUser = (nextUser) => {
+    localStorage.setItem('nexhood_user', JSON.stringify(nextUser));
+    setUser(nextUser);
+  };
+
   const value = useMemo(
     () => ({
       user,
@@ -71,6 +76,7 @@ export const AuthProvider = ({ children }) => {
       register,
       loginWithGoogle,
       logout,
+      updateUser,
     }),
     [user, loading]
   );
@@ -85,3 +91,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+

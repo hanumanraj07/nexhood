@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import { neu, N, useNeuState } from '../styles/neumorphism';
+import { neu, N } from '../styles/theme';
+import { useNeuState } from '../hooks/useNeuState';
 import { landingData } from '../data/landingData';
 
 const TestimonialsSection = () => {
@@ -116,3 +117,8 @@ const TestimonialsSection = () => {
 };
 
 export default TestimonialsSection;
+
+
+
+
+
