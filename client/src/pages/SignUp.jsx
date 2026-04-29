@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { neu, N } from '../styles/theme';
@@ -22,12 +21,15 @@ const SignUp = () => {
   const emailState = useNeuState(neu.inset);
   const passState = useNeuState(neu.inset);
   const apartmentState = useNeuState(neu.inset);
-  const btnState = useNeuState(neu.button);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setSubmitting(true);
     setError('');
+    if (!name.trim() || !email.trim() || !password.trim() || !apartment.trim()) {
+      setError('Please fill all required fields.');
+      return;
+    }
+    setSubmitting(true);
     try {
       await register({ name, email, password, apartment, role: 'resident' });
       navigate('/dashboard');
@@ -59,10 +61,7 @@ const SignUp = () => {
         padding: '20px',
       }}
     >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
+      <div
         style={{
           ...neu.card,
           width: '100%',
@@ -96,7 +95,7 @@ const SignUp = () => {
         </p>
         {error ? <div style={{ width: '100%', marginBottom: '20px', color: '#d64545' }}>{error}</div> : null}
 
-        <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <form noValidate onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label style={{ fontSize: '12px', fontWeight: 800, color: N.textMuted, marginLeft: '16px' }}>FULL NAME</label>
             <input
@@ -145,24 +144,25 @@ const SignUp = () => {
             />
           </div>
 
-          <motion.button
-            {...btnState}
+          <button
             type="submit"
-            whileHover={{ scale: 1.02 }}
-            whileTap={neu.buttonPressed}
             style={{
-              ...btnState.style,
-              background: N.teal,
-              color: '#fff',
+              width: '100%',
+              border: 'none',
+              background: '#2a9d8f',
+              color: '#ffffff',
               padding: '16px',
               borderRadius: '16px',
               fontWeight: 800,
               fontSize: '16px',
               marginTop: '10px',
+              boxShadow: 'var(--nh-shadow-button)',
+              opacity: submitting ? 0.85 : 1,
             }}
+            disabled={submitting}
           >
             {submitting ? 'Creating Account...' : 'Create Account'}
-          </motion.button>
+          </button>
         </form>
 
         <div style={{ width: '100%' }}>
@@ -188,12 +188,13 @@ const SignUp = () => {
             Sign In
           </Link>
         </p>
-      </motion.div>
+      </div>
     </div>
   );
 };
 
 export default SignUp;
+
 
 
 
