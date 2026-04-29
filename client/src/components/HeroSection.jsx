@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { FiMapPin } from 'react-icons/fi';
 import { neu, N } from '../styles/theme';
 import { useNeuState } from '../hooks/useNeuState';
+import landingMainImage from '../assets/landingMain.png';
 
 const HeroSection = () => {
   const searchBarState = useNeuState(neu.searchBar);
@@ -89,7 +90,7 @@ const HeroSection = () => {
         }}
       >
         <motion.img
-          src="/src/assets/landingMain.png"
+          src={landingMainImage}
           alt="NexHood Preview"
           animate={{ scale: [1, 1.025, 1] }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}

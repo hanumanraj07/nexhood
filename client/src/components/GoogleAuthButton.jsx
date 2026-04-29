@@ -9,13 +9,18 @@ const GoogleAuthButton = ({ onCredential, text = 'signin_with', label = 'Continu
   const buttonRef = useRef(null);
   const [ready, setReady] = useState(false);
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const allowedOrigins = String(import.meta.env.VITE_GOOGLE_ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+  const isOriginAllowed = !allowedOrigins.length || allowedOrigins.includes(window.location.origin);
 
   useEffect(() => {
     credentialCallbackRef = onCredential;
   }, [onCredential]);
 
   useEffect(() => {
-    if (!clientId || !window.google?.accounts?.id || !buttonRef.current) {
+    if (!clientId || !isOriginAllowed || !window.google?.accounts?.id || !buttonRef.current) {
       return;
     }
 
@@ -37,9 +42,9 @@ const GoogleAuthButton = ({ onCredential, text = 'signin_with', label = 'Continu
       shape: 'pill',
     });
     setReady(true);
-  }, [clientId, text]);
+  }, [clientId, isOriginAllowed, text]);
 
-  if (!clientId) {
+  if (!clientId || !isOriginAllowed) {
     return (
       <button
         type="button"
@@ -60,7 +65,9 @@ const GoogleAuthButton = ({ onCredential, text = 'signin_with', label = 'Continu
         }}
       >
         <FcGoogle size={22} />
-        Add `VITE_GOOGLE_CLIENT_ID` to enable Google sign-in
+        {!clientId
+          ? 'Add `VITE_GOOGLE_CLIENT_ID` to enable Google sign-in'
+          : 'Google sign-in is disabled for this site origin'}
       </button>
     );
   }

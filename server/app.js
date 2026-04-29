@@ -36,6 +36,8 @@ const getAllowedOrigins = () => {
     'http://localhost:5173',
     'http://127.0.0.1:5174',
     'http://localhost:5174',
+    'https://nexhood.vercel.app',
+    'https://www.nexhood.vercel.app',
   ]
     .filter(Boolean)
     .flatMap((value) => String(value).split(','))

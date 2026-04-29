@@ -70,7 +70,7 @@ const RiskCommandPage = () => {
             <h2 style={{ fontSize: '20px', fontWeight: 800, color: N.tealDeep }}>Future Risk Radar</h2>
           </div>
           <div style={{ height: 300 }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={240} minHeight={180}>
               <RadarChart data={data?.futureRiskRadar || []}>
                 <PolarGrid />
                 <PolarAngleAxis dataKey="name" />
@@ -89,7 +89,7 @@ const RiskCommandPage = () => {
             <h2 style={{ fontSize: '20px', fontWeight: 800, color: N.tealDeep }}>Neighborhood Digital Twin</h2>
           </div>
           <div style={{ height: 300 }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={240} minHeight={180}>
               <BarChart data={digitalTwinData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
@@ -110,7 +110,7 @@ const RiskCommandPage = () => {
             <h2 style={{ fontSize: '20px', fontWeight: 800, color: N.tealDeep }}>Risk Trend Stack</h2>
           </div>
           <div style={{ height: 260 }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={240} minHeight={180}>
               <LineChart data={lineData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
@@ -145,6 +145,7 @@ const RiskCommandPage = () => {
 };
 
 export default RiskCommandPage;
+
 
 
 

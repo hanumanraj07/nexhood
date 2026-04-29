@@ -1,6 +1,18 @@
 import axios from 'axios';
 
-const configuredBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const normalizeApiBaseURL = (url) => {
+  const raw = String(url || '').trim();
+  if (!raw) {
+    return 'http://localhost:4000/api';
+  }
+  const withoutTrailing = raw.replace(/\/+$/, '');
+  if (withoutTrailing.endsWith('/api')) {
+    return withoutTrailing;
+  }
+  return `${withoutTrailing}/api`;
+};
+
+const configuredBaseURL = normalizeApiBaseURL(import.meta.env.VITE_API_URL || 'http://localhost:4000/api');
 const fallbackBaseURLs = Array.from(
   new Set([
     configuredBaseURL,

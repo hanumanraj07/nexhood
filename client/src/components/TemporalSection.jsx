@@ -39,7 +39,7 @@ const TemporalSection = () => {
                     </p>
 
                     <div style={{ height: '80px', width: '100%' }}>
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={240} minHeight={60}>
                             <BarChart data={landingData.historicalData}>
                                 <Bar
                                     dataKey="value"
@@ -129,6 +129,7 @@ const TemporalSection = () => {
 };
 
 export default TemporalSection;
+
 
 
 

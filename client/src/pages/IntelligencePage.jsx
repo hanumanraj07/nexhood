@@ -245,7 +245,7 @@ const IntelligencePage = () => {
             <h2 style={sectionTitleStyle}>2. Future Risk Radar</h2>
           </div>
           <div style={{ height: 290 }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={240} minHeight={180}>
               <RadarChart data={data?.futureRiskRadar || []}>
                 <PolarGrid />
                 <PolarAngleAxis dataKey="name" />
@@ -266,7 +266,7 @@ const IntelligencePage = () => {
             <h2 style={sectionTitleStyle}>3. Neighborhood Digital Twin</h2>
           </div>
           <div style={{ height: 280 }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={240} minHeight={180}>
               <BarChart data={digitalTwinData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
@@ -323,7 +323,7 @@ const IntelligencePage = () => {
             <h2 style={sectionTitleStyle}>5. Resident Sentiment Engine</h2>
           </div>
           <div style={{ height: 280 }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={240} minHeight={180}>
               <RadarChart data={sentimentRadar}>
                 <PolarGrid />
                 <PolarAngleAxis dataKey="metric" />
@@ -520,7 +520,7 @@ const IntelligencePage = () => {
           <h2 style={sectionTitleStyle}>Implementation Snapshot</h2>
         </div>
         <div style={{ height: 260 }}>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={240} minHeight={180}>
             <LineChart data={(data?.futureRiskRadar || []).map((risk) => ({ name: risk.name, growth: 100 - risk.overdevelopmentRisk, safety: 100 - risk.floodRisk, air: 100 - risk.pollutionRisk }))}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
@@ -555,6 +555,7 @@ const simulateButtonStyle = {
 };
 
 export default IntelligencePage;
+
 
 
 
