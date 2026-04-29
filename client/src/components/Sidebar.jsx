@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   FiActivity,
@@ -17,13 +17,16 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { neu, N } from '../styles/theme';
 
-const Sidebar = ({ compact = false }) => {
+const Sidebar = ({ compact = false, onNavigate }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const handleLogout = () => {
+  const confirmLogout = () => {
     logout();
     navigate('/');
+    if (onNavigate) onNavigate();
+    setShowLogoutConfirm(false);
   };
 
   const navItems = {
@@ -64,97 +67,154 @@ const Sidebar = ({ compact = false }) => {
   const items = navItems[user?.role || 'resident'];
 
   return (
-    <aside
-      style={{
-        width: compact ? '100%' : '240px',
-        minHeight: compact ? 'auto' : 'calc(100vh - 40px)',
-        background: N.bg,
-        borderRadius: '30px',
-        padding: '28px 20px',
-        display: 'flex',
-        flexDirection: compact ? 'row' : 'column',
-        justifyContent: 'space-between',
-        gap: '20px',
-        ...neu.raised,
-        position: compact ? 'static' : 'sticky',
-        top: compact ? 'auto' : '20px',
-      }}
-    >
-      <div style={{ minWidth: 0 }}>
-        <div
-          style={{
-            fontSize: '22px',
-            fontWeight: 900,
-            color: N.teal,
-            marginBottom: compact ? '14px' : '34px',
-            paddingLeft: '10px',
-          }}
-        >
-          NexHood
-        </div>
-
-        <nav
-          style={{
-            display: 'flex',
-            flexDirection: compact ? 'row' : 'column',
-            flexWrap: 'wrap',
-            gap: '12px',
-          }}
-        >
-          {items.map((item) => (
-            <NavLink
-              key={item.id}
-              to={item.path}
-              end={item.path === '/dashboard'}
-              style={({ isActive }) => ({
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '12px 16px',
-                borderRadius: '16px',
-                textDecoration: 'none',
-                color: isActive ? N.teal : N.textLight,
-                fontWeight: 700,
-                fontSize: '15px',
-                ...(isActive ? neu.inset : {}),
-                transition: 'all 0.3s ease',
-              })}
-            >
-              {item.icon}
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-      </div>
-
-      <button
-        onClick={handleLogout}
+    <>
+      <aside
         style={{
+          width: '100%',
+          minHeight: compact ? 'auto' : 'calc(100vh - 40px)',
+          background: N.bg,
+          borderRadius: compact ? '22px' : '30px',
+          padding: compact ? '20px 16px' : '28px 20px',
           display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          padding: '12px 16px',
-          borderRadius: '16px',
-          border: 'none',
-          background: 'transparent',
-          color: '#e74c3c',
-          fontWeight: 700,
-          fontSize: '15px',
-          cursor: 'pointer',
-          width: compact ? 'auto' : '100%',
-          alignSelf: compact ? 'flex-start' : 'stretch',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          gap: '20px',
+          ...neu.raised,
+          position: compact ? 'static' : 'sticky',
+          top: compact ? 'auto' : '20px',
         }}
       >
-        <FiLogOut />
-        Sign Out
-      </button>
-    </aside>
+        <div style={{ minWidth: 0 }}>
+          <div
+            style={{
+              fontSize: compact ? '20px' : '22px',
+              fontWeight: 900,
+              color: N.teal,
+              marginBottom: compact ? '18px' : '34px',
+              paddingLeft: '10px',
+            }}
+          >
+            NexHood
+          </div>
+
+          <nav
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+            }}
+          >
+            {items.map((item) => (
+              <NavLink
+                key={item.id}
+                to={item.path}
+                end={item.path === '/dashboard'}
+                onClick={onNavigate}
+                style={({ isActive }) => ({
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '11px 14px',
+                  borderRadius: '14px',
+                  textDecoration: 'none',
+                  color: isActive ? N.teal : N.textLight,
+                  fontWeight: 700,
+                  fontSize: compact ? '14px' : '15px',
+                  ...(isActive ? neu.inset : {}),
+                  transition: 'all 0.3s ease',
+                })}
+              >
+                {item.icon}
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+
+        <button
+          onClick={() => setShowLogoutConfirm(true)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '12px 14px',
+            borderRadius: '14px',
+            border: 'none',
+            background: 'transparent',
+            color: '#e74c3c',
+            fontWeight: 700,
+            fontSize: compact ? '14px' : '15px',
+            cursor: 'pointer',
+            width: '100%',
+            alignSelf: 'stretch',
+          }}
+        >
+          <FiLogOut />
+          Sign Out
+        </button>
+      </aside>
+
+      {showLogoutConfirm ? (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1400,
+            background: 'rgba(38, 70, 83, 0.32)',
+            display: 'grid',
+            placeItems: 'center',
+            padding: '16px',
+          }}
+          onClick={() => setShowLogoutConfirm(false)}
+        >
+          <div
+            onClick={(event) => event.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: '420px',
+              background: N.bg,
+              borderRadius: '24px',
+              padding: '22px',
+              boxShadow: '12px 12px 28px rgba(184,190,199,0.95), -10px -10px 24px rgba(255,255,255,0.9)',
+            }}
+          >
+            <h3 style={{ fontSize: '22px', fontWeight: 900, color: N.tealDeep }}>Sign out?</h3>
+            <p style={{ marginTop: '8px', color: N.textLight, lineHeight: 1.6 }}>
+              You will need to sign in again to access your dashboard.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px', marginTop: '18px' }}>
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirm(false)}
+                style={{
+                  ...neu.raised,
+                  borderRadius: '14px',
+                  padding: '11px 12px',
+                  color: N.text,
+                  fontWeight: 800,
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmLogout}
+                style={{
+                  borderRadius: '14px',
+                  padding: '11px 12px',
+                  background: '#e74c3c',
+                  color: '#fff',
+                  fontWeight: 800,
+                }}
+              >
+                Yes, Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 };
 
 export default Sidebar;
-
-
-
-
-

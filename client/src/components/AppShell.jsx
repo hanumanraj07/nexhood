@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { FiMenu, FiX } from 'react-icons/fi';
 import Sidebar from './Sidebar';
-import { N } from '../styles/theme';
+import { N, neu } from '../styles/theme';
 import { useAuth } from '../context/AuthContext';
 import ChangeLocationModal from './ChangeLocationModal';
 
@@ -20,9 +21,16 @@ const AppShell = ({ title, subtitle, children, actions }) => {
   const isMobile = useIsMobile();
   const { user, updateUser } = useAuth();
   const [showLocationModal, setShowLocationModal] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const role = String(user?.role || 'guest');
   const roleTone =
     role === 'admin' ? { bg: '#ffe9db', color: '#b85c38' } : role === 'guard' ? { bg: '#e7f0ff', color: '#3567b8' } : { bg: '#edf7f4', color: N.tealDark };
+
+  useEffect(() => {
+    if (!isMobile) {
+      setMobileNavOpen(false);
+    }
+  }, [isMobile]);
 
   return (
     <div
@@ -33,10 +41,36 @@ const AppShell = ({ title, subtitle, children, actions }) => {
         display: 'grid',
         gridTemplateColumns: isMobile ? '1fr' : '260px minmax(0, 1fr)',
         gap: '20px',
-        padding: '20px',
+        padding: isMobile ? '12px' : '20px',
       }}
     >
-      <Sidebar compact={isMobile} />
+      {isMobile ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <button
+            type="button"
+            onClick={() => setMobileNavOpen((prev) => !prev)}
+            aria-label={mobileNavOpen ? 'Close dashboard menu' : 'Open dashboard menu'}
+            aria-expanded={mobileNavOpen}
+            style={{
+              ...neu.raised,
+              height: '50px',
+              borderRadius: '14px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: N.tealDeep,
+              fontWeight: 800,
+              gap: '8px',
+            }}
+          >
+            {mobileNavOpen ? <FiX size={20} /> : <FiMenu size={20} />}
+            {mobileNavOpen ? 'Close Menu' : 'Dashboard Menu'}
+          </button>
+          {mobileNavOpen ? <Sidebar compact onNavigate={() => setMobileNavOpen(false)} /> : null}
+        </div>
+      ) : (
+        <Sidebar />
+      )}
       <main style={{ minWidth: 0 }}>
         <section
           className="dashboard-panel"
@@ -45,8 +79,8 @@ const AppShell = ({ title, subtitle, children, actions }) => {
               'linear-gradient(180deg, rgba(255,255,255,0.42), rgba(224,229,236,0.96) 28%, rgba(224,229,236,1) 100%)',
             borderRadius: '32px',
             boxShadow: '12px 12px 28px rgba(184,190,199,0.95), -10px -10px 24px rgba(255,255,255,0.9)',
-            padding: isMobile ? '24px' : '32px',
-            minHeight: 'calc(100vh - 40px)',
+            padding: isMobile ? '20px' : '32px',
+            minHeight: isMobile ? 'auto' : 'calc(100vh - 40px)',
             backdropFilter: 'blur(12px)',
           }}
         >
@@ -119,8 +153,3 @@ const AppShell = ({ title, subtitle, children, actions }) => {
 };
 
 export default AppShell;
-
-
-
-
-

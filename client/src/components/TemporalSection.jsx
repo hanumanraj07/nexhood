@@ -12,7 +12,7 @@ const TemporalSection = () => {
     });
 
     return (
-        <section ref={ref} style={{ padding: '64px 48px', backgroundColor: N.bg }}>
+        <section ref={ref} style={{ padding: '64px clamp(18px, 5vw, 48px)', backgroundColor: N.bg }}>
             <div style={{
                 maxWidth: '1000px',
                 margin: '0 auto',
@@ -39,7 +39,7 @@ const TemporalSection = () => {
                     </p>
 
                     <div style={{ height: '80px', width: '100%' }}>
-                        <ResponsiveContainer width="100%" height="100%" minWidth={240} minHeight={60}>
+                        <ResponsiveContainer width="100%" height="100%" minHeight={60}>
                             <BarChart data={landingData.historicalData}>
                                 <Bar
                                     dataKey="value"
@@ -129,6 +129,7 @@ const TemporalSection = () => {
 };
 
 export default TemporalSection;
+
 
 
 

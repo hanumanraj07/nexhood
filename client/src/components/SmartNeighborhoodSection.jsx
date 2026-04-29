@@ -13,7 +13,7 @@ const SmartNeighborhoodSection = () => {
     const feature = landingData.features.find(f => f.id === 'neighborhood');
 
     return (
-        <section ref={ref} style={{ padding: '80px 48px', backgroundColor: N.bg }}>
+        <section ref={ref} style={{ padding: '80px clamp(18px, 5vw, 48px)', backgroundColor: N.bg }}>
             <div style={{
                 maxWidth: '1100px',
                 margin: '0 auto',
@@ -66,7 +66,7 @@ const SmartNeighborhoodSection = () => {
                         {feature.description}
                     </p>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '20px' }}>
                         {feature.stats.map((stat, i) => (
                             <div key={i} style={{ ...neu.card, padding: '20px', textAlign: 'center' }}>
                                 <div style={{ fontSize: '24px', fontWeight: 800, color: N.teal }}>{stat.value}</div>
@@ -83,6 +83,7 @@ const SmartNeighborhoodSection = () => {
 };
 
 export default SmartNeighborhoodSection;
+
 
 
 
