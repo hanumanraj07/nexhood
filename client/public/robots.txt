@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /signin
+Disallow: /signup
+
+Sitemap: https://nexhood.vercel.app/sitemap.xml
