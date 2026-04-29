@@ -63,14 +63,14 @@ const RiskCommandPage = () => {
         <StatCard label="High Alert Area" value={data?.futureRiskRadar?.sort((a, b) => b.pollutionRisk - a.pollutionRisk)?.[0]?.name || '--'} hint="Current highest pollution pressure." tone="danger" />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginTop: '22px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px', marginTop: '22px' }}>
         <section style={panelStyle}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
             <RadarIcon style={{ width: 18, height: 18, color: N.teal }} />
             <h2 style={{ fontSize: '20px', fontWeight: 800, color: N.tealDeep }}>Future Risk Radar</h2>
           </div>
           <div style={{ height: 300 }}>
-            <ResponsiveContainer width="100%" height="100%" minWidth={240} minHeight={180}>
+            <ResponsiveContainer width="100%" height="100%" minHeight={180}>
               <RadarChart data={data?.futureRiskRadar || []}>
                 <PolarGrid />
                 <PolarAngleAxis dataKey="name" />
@@ -89,7 +89,7 @@ const RiskCommandPage = () => {
             <h2 style={{ fontSize: '20px', fontWeight: 800, color: N.tealDeep }}>Neighborhood Digital Twin</h2>
           </div>
           <div style={{ height: 300 }}>
-            <ResponsiveContainer width="100%" height="100%" minWidth={240} minHeight={180}>
+            <ResponsiveContainer width="100%" height="100%" minHeight={180}>
               <BarChart data={digitalTwinData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
@@ -103,14 +103,14 @@ const RiskCommandPage = () => {
         </section>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '18px', marginTop: '22px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px', marginTop: '22px' }}>
         <section style={panelStyle}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
             <AlertTriangle style={{ width: 18, height: 18, color: N.teal }} />
             <h2 style={{ fontSize: '20px', fontWeight: 800, color: N.tealDeep }}>Risk Trend Stack</h2>
           </div>
           <div style={{ height: 260 }}>
-            <ResponsiveContainer width="100%" height="100%" minWidth={240} minHeight={180}>
+            <ResponsiveContainer width="100%" height="100%" minHeight={180}>
               <LineChart data={lineData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
@@ -145,6 +145,7 @@ const RiskCommandPage = () => {
 };
 
 export default RiskCommandPage;
+
 
 
 

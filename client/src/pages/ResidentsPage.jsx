@@ -37,7 +37,7 @@ const ResidentsPage = () => {
         <StatCard label="Incident Reports" value={stats?.totalIncidents ?? '--'} tone="danger" />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '18px', marginTop: '22px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px', marginTop: '22px' }}>
         <div style={{ padding: '22px', borderRadius: '24px', background: N.bg, boxShadow: '8px 8px 16px #b8bec7, -8px -8px 16px #ffffff' }}>
           <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '18px' }}>Residents</h2>
           <div style={{ display: 'grid', gap: '12px' }}>
@@ -74,6 +74,7 @@ const ResidentsPage = () => {
 };
 
 export default ResidentsPage;
+
 
 
 

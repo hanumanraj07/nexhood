@@ -71,7 +71,7 @@ const DocumentsSimulatorPage = () => {
         <StatCard label="Tracked Markets" value={data?.investmentSimulator?.areas?.length || '--'} hint="Neighborhoods available for scenario testing." tone="success" />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginTop: '22px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px', marginTop: '22px' }}>
         <section style={panelStyle}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
             <FileSearch style={{ width: 18, height: 18, color: N.teal }} />
@@ -156,7 +156,7 @@ const DocumentsSimulatorPage = () => {
             </button>
             {simulation ? (
               <div style={{ padding: '16px', borderRadius: '18px', background: 'rgba(255,255,255,0.32)' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(92px, 1fr))', gap: '10px' }}>
                   <div><strong>Baseline:</strong> {simulation.baselineScore}</div>
                   <div><strong>Adjusted:</strong> {simulation.adjustedScore}</div>
                   <div><strong>Projected ROI:</strong> {simulation.projectedRoi}%</div>
@@ -189,6 +189,7 @@ const simulateButtonStyle = {
 };
 
 export default DocumentsSimulatorPage;
+
 
 
 

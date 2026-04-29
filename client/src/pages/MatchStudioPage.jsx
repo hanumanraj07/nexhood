@@ -54,7 +54,7 @@ const MatchStudioPage = () => {
         <StatCard label="Top Match" value={activeProfile?.rankings?.[0]?.name || '--'} hint="Current highest-fit locality for the chosen profile." />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginTop: '22px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px', marginTop: '22px' }}>
         <section style={panelStyle}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
             <BrainCircuit style={{ width: 18, height: 18, color: N.teal }} />
@@ -109,7 +109,7 @@ const MatchStudioPage = () => {
                   </div>
                   <div style={{ color: N.tealDark, fontWeight: 800 }}>{property.possession}</div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px', marginTop: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', marginTop: '12px' }}>
                   <div><strong>Livability:</strong> {property.livability}</div>
                   <div><strong>Appreciation:</strong> {property.appreciation}</div>
                 </div>
@@ -135,6 +135,7 @@ const MatchStudioPage = () => {
 };
 
 export default MatchStudioPage;
+
 
 
 
