@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { neu, N } from '../styles/theme';
@@ -18,12 +17,15 @@ const SignIn = () => {
 
   const emailState = useNeuState(neu.inset);
   const passState = useNeuState(neu.inset);
-  const btnState = useNeuState(neu.button);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setSubmitting(true);
     setError('');
+    if (!email.trim() || !password.trim()) {
+      setError('Please fill in email and password.');
+      return;
+    }
+    setSubmitting(true);
     try {
       await login({ email, password });
       navigate('/dashboard');
@@ -55,10 +57,7 @@ const SignIn = () => {
         padding: '20px',
       }}
     >
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+      <div
         style={{
           ...neu.card,
           width: '100%',
@@ -91,7 +90,7 @@ const SignIn = () => {
         </p>
         {error ? <div style={{ width: '100%', marginBottom: '20px', color: '#d64545' }}>{error}</div> : null}
 
-        <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <form noValidate onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label style={{ fontSize: '12px', fontWeight: 800, color: N.textMuted, marginLeft: '16px' }}>EMAIL ADDRESS</label>
             <input
@@ -128,24 +127,25 @@ const SignIn = () => {
             />
           </div>
 
-          <motion.button
-            {...btnState}
+          <button
             type="submit"
-            whileHover={{ scale: 1.02 }}
-            whileTap={neu.buttonPressed}
             style={{
-              ...btnState.style,
-              background: N.teal,
-              color: '#fff',
+              width: '100%',
+              border: 'none',
+              background: '#2a9d8f',
+              color: '#ffffff',
               padding: '16px',
               borderRadius: '16px',
               fontWeight: 800,
               fontSize: '16px',
               marginTop: '10px',
+              boxShadow: 'var(--nh-shadow-button)',
+              opacity: submitting ? 0.85 : 1,
             }}
+            disabled={submitting}
           >
             {submitting ? 'Signing In...' : 'Sign In'}
-          </motion.button>
+          </button>
         </form>
 
         <div style={{ width: '100%' }}>
@@ -175,12 +175,13 @@ const SignIn = () => {
             Create Account
           </Link>
         </p>
-      </motion.div>
+      </div>
     </div>
   );
 };
 
 export default SignIn;
+
 
 
 

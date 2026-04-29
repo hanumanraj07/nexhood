@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import AppShell from '../components/AppShell';
 import { parkingService } from '../services/parkingService';
 import { extractErrorMessage } from '../services/api';
@@ -31,6 +31,16 @@ const GuardPage = () => {
   const [error, setError] = useState('');
   const [scanInfo, setScanInfo] = useState('');
   const [toast, setToast] = useState(null);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [cameraStatus, setCameraStatus] = useState('');
+  const [cameraLoading, setCameraLoading] = useState(false);
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+  const animationRef = useRef(null);
+  const scanningFrameRef = useRef(false);
+  const barcodeDetectorRef = useRef(null);
+  const jsQrRef = useRef(null);
+  const canvasRef = useRef(null);
   const canVerify = user?.role === 'guard' || user?.role === 'admin';
 
   const showToast = (type, message) => {
@@ -77,6 +87,28 @@ const GuardPage = () => {
     load();
   }, []);
 
+  const stopCamera = useCallback(() => {
+    if (animationRef.current) {
+      window.cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+
+    scanningFrameRef.current = false;
+    setCameraActive(false);
+    setCameraLoading(false);
+  }, []);
+
+  useEffect(() => () => stopCamera(), [stopCamera]);
+
   const verify = async (value = token) => {
     setError('');
     if (!canVerify) {
@@ -111,6 +143,140 @@ const GuardPage = () => {
       setResult(null);
     }
   };
+
+  const decodeQrFromVideoFrame = async () => {
+    const video = videoRef.current;
+    if (!video || video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
+      return '';
+    }
+
+    if ('BarcodeDetector' in window) {
+      try {
+        if (!barcodeDetectorRef.current) {
+          barcodeDetectorRef.current = new window.BarcodeDetector({ formats: ['qr_code'] });
+        }
+        const results = await barcodeDetectorRef.current.detect(video);
+        const scanned = String(results?.[0]?.rawValue || '').trim();
+        if (scanned) return scanned;
+      } catch {
+        barcodeDetectorRef.current = null;
+      }
+    }
+
+    if (!jsQrRef.current) {
+      const jsQRModule = await import('jsqr');
+      jsQrRef.current = jsQRModule.default || jsQRModule;
+    }
+
+    const canvas = canvasRef.current || document.createElement('canvas');
+    canvasRef.current = canvas;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (!context) return '';
+
+    const maxWidth = 720;
+    const scale = Math.min(1, maxWidth / video.videoWidth);
+    const width = Math.max(1, Math.round(video.videoWidth * scale));
+    const height = Math.max(1, Math.round(video.videoHeight * scale));
+    canvas.width = width;
+    canvas.height = height;
+    context.drawImage(video, 0, 0, width, height);
+
+    const imageData = context.getImageData(0, 0, width, height);
+    const decoded = jsQrRef.current(imageData.data, imageData.width, imageData.height, {
+      inversionAttempts: 'attemptBoth',
+    });
+
+    return String(decoded?.data || '').trim();
+  };
+
+  const startCamera = async () => {
+    setError('');
+    setScanInfo('');
+    setCameraStatus('');
+
+    if (!canVerify) {
+      const message = `Only guard/admin can verify QR passes. Current role: ${user?.role || 'unknown'}.`;
+      setError(message);
+      showToast('error', message);
+      return;
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      const message = 'Camera scanning is not supported in this browser. Upload a QR image or paste the token instead.';
+      setError(message);
+      showToast('error', message);
+      return;
+    }
+
+    try {
+      setCameraLoading(true);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      });
+
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+
+      setCameraActive(true);
+      setCameraStatus(`Camera ready for ${scanType === 'entry' ? 'entry' : 'exit'} scan.`);
+    } catch (err) {
+      const message =
+        err?.name === 'NotAllowedError'
+          ? 'Camera permission was blocked. Allow camera access and try again.'
+          : 'Unable to start the camera. Upload a QR image or paste the token instead.';
+      setError(message);
+      showToast('error', message);
+      stopCamera();
+    } finally {
+      setCameraLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!cameraActive) return undefined;
+
+    const scanLoop = async () => {
+      if (!cameraActive) return;
+
+      if (!scanningFrameRef.current) {
+        scanningFrameRef.current = true;
+        try {
+          const scannedToken = await decodeQrFromVideoFrame();
+          if (scannedToken) {
+            setToken(scannedToken);
+            setScanInfo(`QR detected from camera. Running ${scanType} verification...`);
+            setCameraStatus('QR detected. Camera stopped.');
+            showToast('success', 'QR detected. Running verification...');
+            stopCamera();
+            await verify(scannedToken);
+            return;
+          }
+        } catch {
+          setCameraStatus('Still scanning...');
+        } finally {
+          scanningFrameRef.current = false;
+        }
+      }
+
+      animationRef.current = window.requestAnimationFrame(scanLoop);
+    };
+
+    animationRef.current = window.requestAnimationFrame(scanLoop);
+    return () => {
+      if (animationRef.current) {
+        window.cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+    };
+  }, [cameraActive, scanType, stopCamera]);
 
   const decodeQrFromImageFile = async (file) => {
     if (!file) return;
@@ -229,9 +395,93 @@ const GuardPage = () => {
           You are signed in as <strong>{user?.role || 'unknown'}</strong>. Sign in with a <strong>guard</strong> or <strong>admin</strong> account to verify QR passes.
         </div>
       ) : null}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '18px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px' }}>
         <div style={{ padding: '22px', borderRadius: '24px', background: N.bg, boxShadow: '8px 8px 16px #b8bec7, -8px -8px 16px #ffffff' }}>
           <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '18px' }}>Scan or Paste Token</h2>
+
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '14px' }}>
+            <button type="button" onClick={() => setScanType('entry')} style={{ ...modeButtonStyle, background: scanType === 'entry' ? '#edf7f4' : N.bg }}>
+              Entry
+            </button>
+            <button type="button" onClick={() => setScanType('exit')} style={{ ...modeButtonStyle, background: scanType === 'exit' ? '#fff2eb' : N.bg }}>
+              Exit
+            </button>
+          </div>
+
+          <div
+            style={{
+              borderRadius: '20px',
+              background: '#d6dde6',
+              boxShadow: 'inset 5px 5px 12px #b8bec7, inset -5px -5px 12px #ffffff',
+              minHeight: '220px',
+              overflow: 'hidden',
+              position: 'relative',
+              display: 'grid',
+              placeItems: 'center',
+              marginBottom: '12px',
+            }}
+          >
+            <video
+              ref={videoRef}
+              muted
+              playsInline
+              style={{
+                width: '100%',
+                height: cameraActive ? '100%' : 0,
+                minHeight: cameraActive ? '220px' : 0,
+                objectFit: 'cover',
+                display: cameraActive ? 'block' : 'none',
+              }}
+            />
+            {!cameraActive ? (
+              <div style={{ color: N.textLight, fontWeight: 800, textAlign: 'center', padding: '28px' }}>
+                Camera scanner is off
+              </div>
+            ) : (
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: '14%',
+                  border: '3px solid rgba(255,255,255,0.82)',
+                  borderRadius: '18px',
+                  boxShadow: '0 0 0 999px rgba(38,70,83,0.18)',
+                  pointerEvents: 'none',
+                }}
+              />
+            )}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', marginBottom: '12px' }}>
+            <button
+              type="button"
+              onClick={startCamera}
+              disabled={cameraLoading || cameraActive}
+              style={{
+                ...primaryButtonStyle,
+                background: cameraActive ? '#9fb1bd' : N.teal,
+                marginTop: 0,
+                opacity: cameraLoading || cameraActive ? 0.75 : 1,
+              }}
+            >
+              {cameraLoading ? 'Starting...' : 'Start Camera'}
+            </button>
+            <button
+              type="button"
+              onClick={stopCamera}
+              disabled={!cameraActive}
+              style={{
+                ...primaryButtonStyle,
+                background: cameraActive ? '#e74c3c' : '#9fb1bd',
+                marginTop: 0,
+                opacity: cameraActive ? 1 : 0.65,
+              }}
+            >
+              Stop Camera
+            </button>
+          </div>
+
+          {cameraStatus ? <div style={{ color: N.textLight, marginBottom: '10px', fontWeight: 700 }}>{cameraStatus}</div> : null}
+
           <input
             type="file"
             accept="image/*"
@@ -260,14 +510,6 @@ const GuardPage = () => {
               resize: 'vertical',
             }}
           />
-          <div style={{ display: 'flex', gap: '12px', marginTop: '14px' }}>
-            <button type="button" onClick={() => setScanType('entry')} style={{ ...modeButtonStyle, background: scanType === 'entry' ? '#edf7f4' : N.bg }}>
-              Entry
-            </button>
-            <button type="button" onClick={() => setScanType('exit')} style={{ ...modeButtonStyle, background: scanType === 'exit' ? '#fff2eb' : N.bg }}>
-              Exit
-            </button>
-          </div>
           <button type="button" onClick={() => verify()} style={{ ...primaryButtonStyle, marginTop: '16px' }}>
             Verify Pass
           </button>
@@ -318,6 +560,7 @@ const GuardPage = () => {
 };
 
 export default GuardPage;
+
 
 
 
