@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
 import AppShell from '../components/AppShell';
+import GoogleMapView from '../components/GoogleMapView';
 import { neighborhoodService } from '../services/neighborhoodService';
 import { extractErrorMessage } from '../services/api';
 import { N } from '../styles/theme';
@@ -60,6 +60,7 @@ const LocationExplorerPage = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [failedImages, setFailedImages] = useState({});
+  const mapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   const markImageFailed = (key) => {
     setFailedImages((current) => ({ ...current, [key]: true }));
@@ -67,9 +68,7 @@ const LocationExplorerPage = () => {
 
   React.useEffect(() => {
     if (!user?.preferredLocation) return;
-    setQuery((current) =>
-      current.trim().length ? current : user.preferredLocation.displayName
-    );
+    setQuery((current) => (current.trim().length ? current : user.preferredLocation.displayName));
     setSelectedSuggestion((current) =>
       current || {
         id: 'preferred-location',
@@ -156,8 +155,8 @@ const LocationExplorerPage = () => {
   }, [result]);
 
   const mapCenter = result?.location?.coordinates
-    ? [result.location.coordinates.lat, result.location.coordinates.lng]
-    : [18.5642431, 73.7768573];
+    ? { lat: result.location.coordinates.lat, lng: result.location.coordinates.lng }
+    : { lat: 18.5642431, lng: 73.7768573 };
 
   const mapAmenities = useMemo(() => {
     const categories = result?.nearbyAmenities?.categories || {};
@@ -168,6 +167,41 @@ const LocationExplorerPage = () => {
       }))
     );
   }, [result]);
+
+  const mapMarkers = useMemo(() => {
+    const searchedLocationMarker = result?.location?.coordinates
+      ? [
+          {
+            id: 'search-center',
+            position: mapCenter,
+            title: 'Searched Location',
+            color: '#264653',
+            scale: 10,
+            infoHtml: `<div><strong>Searched Location</strong><br/>${result.location.displayName}</div>`,
+          },
+        ]
+      : [];
+
+    const propertyMarkers = (result?.properties || []).map((property) => ({
+      id: property.id,
+      position: { lat: property.coordinates.lat, lng: property.coordinates.lng },
+      title: property.name,
+      color: '#22c55e',
+      scale: 7,
+      infoHtml: `<div><strong>${property.name}</strong><br/>${property.type} • ${property.beds} BHK<br/>Rs. ${currency(property.priceEstimate)}</div>`,
+    }));
+
+    const amenityMarkers = mapAmenities.map((place) => ({
+      id: `${place.categoryLabel}-${place.id}`,
+      position: { lat: place.lat, lng: place.lng },
+      title: place.name,
+      color: '#f97316',
+      scale: 5,
+      infoHtml: `<div><strong>${place.name}</strong><br/>${place.categoryLabel}</div>`,
+    }));
+
+    return [...searchedLocationMarker, ...propertyMarkers, ...amenityMarkers];
+  }, [result, mapAmenities, mapCenter]);
 
   return (
     <AppShell
@@ -220,9 +254,7 @@ const LocationExplorerPage = () => {
                   padding: '8px',
                 }}
               >
-                {suggestLoading ? (
-                  <div style={{ padding: '10px 12px', color: N.textLight, fontWeight: 700 }}>Searching locations...</div>
-                ) : null}
+                {suggestLoading ? <div style={{ padding: '10px 12px', color: N.textLight, fontWeight: 700 }}>Searching locations...</div> : null}
                 {suggestions.map((item) => (
                   <button
                     key={item.id}
@@ -269,83 +301,24 @@ const LocationExplorerPage = () => {
             Showing results around: <span style={{ color: N.tealDeep }}>{result.location.displayName}</span>
           </div>
         ) : null}
-        {selectedSuggestion ? (
-          <div style={{ color: N.tealDeep, fontWeight: 700 }}>
-            Exact point selected from suggestions for accurate nearby results.
-          </div>
-        ) : null}
+        {selectedSuggestion ? <div style={{ color: N.tealDeep, fontWeight: 700 }}>Exact point selected from suggestions for accurate nearby results.</div> : null}
         {error ? <div style={{ color: '#d64545', fontWeight: 700 }}>{error}</div> : null}
       </form>
 
       <section style={{ ...cardStyle, padding: '20px', marginBottom: '20px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 900, marginBottom: '14px' }}>Location Map</h2>
         <div style={{ height: 420, borderRadius: '16px', overflow: 'hidden' }}>
-          <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%' }}>
-            <TileLayer
-              attribution='&copy; OpenStreetMap contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-
-            {result?.location?.coordinates ? (
-              <CircleMarker
-                center={[result.location.coordinates.lat, result.location.coordinates.lng]}
-                radius={10}
-                pathOptions={{ color: '#264653', fillColor: '#2a9d8f', fillOpacity: 1 }}
-              >
-                <Popup>
-                  <strong>Searched Location</strong>
-                  <br />
-                  {result.location.displayName}
-                </Popup>
-              </CircleMarker>
-            ) : null}
-
-            {(result?.properties || []).map((property) => (
-              <CircleMarker
-                key={property.id}
-                center={[property.coordinates.lat, property.coordinates.lng]}
-                radius={7}
-                pathOptions={{ color: '#14532d', fillColor: '#22c55e', fillOpacity: 0.9 }}
-              >
-                <Popup>
-                  <strong>{property.name}</strong>
-                  <br />
-                  {property.type} â€¢ {property.beds} BHK
-                  <br />
-                  Rs. {currency(property.priceEstimate)}
-                </Popup>
-              </CircleMarker>
-            ))}
-
-            {mapAmenities.map((place) => (
-              <CircleMarker
-                key={`${place.categoryLabel}-${place.id}`}
-                center={[place.lat, place.lng]}
-                radius={5}
-                pathOptions={{ color: '#7c2d12', fillColor: '#f97316', fillOpacity: 0.85 }}
-              >
-                <Popup>
-                  <strong>{place.name}</strong>
-                  <br />
-                  {place.categoryLabel}
-                </Popup>
-              </CircleMarker>
-            ))}
-          </MapContainer>
+          <GoogleMapView apiKey={mapsApiKey} center={mapCenter} zoom={13} markers={mapMarkers} style={{ height: '100%', width: '100%' }} />
         </div>
       </section>
 
       <section style={{ ...cardStyle, padding: '20px', marginBottom: '20px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 900, marginBottom: '14px' }}>Available Flats & Homes</h2>
         {result?.properties?.length ? null : result?.location ? (
-          <div style={{ marginBottom: '12px', color: N.textLight, fontWeight: 700 }}>
-            No verified property records were found in this radius right now.
-          </div>
+          <div style={{ marginBottom: '12px', color: N.textLight, fontWeight: 700 }}>No verified property records were found in this radius right now.</div>
         ) : null}
         {result && !result?.properties?.length && result?.nearbyAmenities?.unavailable ? (
-          <div style={{ marginBottom: '12px', color: '#b26a00', fontWeight: 700 }}>
-            Real-time providers are temporarily unavailable. Try again in a moment.
-          </div>
+          <div style={{ marginBottom: '12px', color: '#b26a00', fontWeight: 700 }}>Real-time providers are temporarily unavailable. Try again in a moment.</div>
         ) : null}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
           {(result?.properties || []).map((property) => (
@@ -360,12 +333,7 @@ const LocationExplorerPage = () => {
             >
               {property.image ? (
                 !failedImages[`property-${property.id}`] ? (
-                  <img
-                    src={property.image}
-                    alt={property.name}
-                    style={imageStyle}
-                    onError={() => markImageFailed(`property-${property.id}`)}
-                  />
+                  <img src={property.image} alt={property.name} style={imageStyle} onError={() => markImageFailed(`property-${property.id}`)} />
                 ) : (
                   <div style={placeholderStyle}>No verified image for this listing</div>
                 )
@@ -373,26 +341,18 @@ const LocationExplorerPage = () => {
                 <div style={placeholderStyle}>No verified image for this listing</div>
               )}
               <h3 style={{ marginTop: '10px', fontSize: '17px', fontWeight: 900 }}>{property.name}</h3>
-              <div style={{ marginTop: '6px', color: N.textLight, fontWeight: 700 }}>
-                {property.type} â€¢ {property.beds} BHK â€¢ {property.areaSqFt} sq.ft
-              </div>
-              <div style={{ marginTop: '8px', color: N.teal, fontWeight: 900 }}>
-                Estimated price: Rs. {currency(property.priceEstimate)}
-              </div>
+              <div style={{ marginTop: '6px', color: N.textLight, fontWeight: 700 }}>{property.type} • {property.beds} BHK • {property.areaSqFt} sq.ft</div>
+              <div style={{ marginTop: '8px', color: N.teal, fontWeight: 900 }}>Estimated price: Rs. {currency(property.priceEstimate)}</div>
             </article>
           ))}
         </div>
-        {!loading && result && !result?.properties?.length ? (
-          <p style={{ marginTop: '10px', color: N.textLight }}>No mapped residential properties were found in this radius.</p>
-        ) : null}
+        {!loading && result && !result?.properties?.length ? <p style={{ marginTop: '10px', color: N.textLight }}>No mapped residential properties were found in this radius.</p> : null}
       </section>
 
       <section style={{ ...cardStyle, padding: '20px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 900, marginBottom: '14px' }}>Nearby Schools, Colleges, Hospitals & More</h2>
         {result?.nearbyAmenities?.unavailable ? (
-          <div style={{ marginBottom: '12px', color: '#b26a00', fontWeight: 700 }}>
-            Nearby places API is temporarily unavailable. Showing only confirmed data when available.
-          </div>
+          <div style={{ marginBottom: '12px', color: '#b26a00', fontWeight: 700 }}>Nearby places API is temporarily unavailable. Showing only confirmed data when available.</div>
         ) : null}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', marginBottom: '16px' }}>
           {amenityConfig.map((item) => (
@@ -429,12 +389,7 @@ const LocationExplorerPage = () => {
                 >
                   {place.image ? (
                     !failedImages[`amenity-${section.key}-${place.id}`] ? (
-                      <img
-                        src={place.image}
-                        alt={place.name}
-                        style={imageStyle}
-                        onError={() => markImageFailed(`amenity-${section.key}-${place.id}`)}
-                      />
+                      <img src={place.image} alt={place.name} style={imageStyle} onError={() => markImageFailed(`amenity-${section.key}-${place.id}`)} />
                     ) : (
                       <div style={placeholderStyle}>No verified image for this place</div>
                     )
@@ -448,17 +403,10 @@ const LocationExplorerPage = () => {
           </div>
         ))}
 
-        {!loading && result && !amenitySections.length ? (
-          <p style={{ marginTop: '10px', color: N.textLight }}>Nearby points of interest could not be fetched for this location.</p>
-        ) : null}
+        {!loading && result && !amenitySections.length ? <p style={{ marginTop: '10px', color: N.textLight }}>Nearby points of interest could not be fetched for this location.</p> : null}
       </section>
     </AppShell>
   );
 };
 
 export default LocationExplorerPage;
-
-
-
-
-

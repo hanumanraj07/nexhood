@@ -1,8 +1,12 @@
 const express = require('express');
 const { readDb } = require('../data/store');
 const { attachLiveAqi, attachLiveAqiToMany } = require('../utils/openaq');
-const { getNearbyAmenities, getNearbyProperties } = require('../utils/overpass');
-const { geocodeLocation, suggestLocations } = require('../utils/geocode');
+const {
+  getNearbyAmenities,
+  getNearbyProperties,
+  geocodeLocation,
+  suggestLocations,
+} = require('../utils/googlePlaces');
 
 const router = express.Router();
 

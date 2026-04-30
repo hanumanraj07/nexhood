@@ -15,8 +15,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
 import AppShell from '../components/AppShell';
+import GoogleMapView from '../components/GoogleMapView';
 import { neighborhoodService } from '../services/neighborhoodService';
 import { extractErrorMessage } from '../services/api';
 import { N } from '../styles/theme';
@@ -114,6 +114,7 @@ const NeighborhoodPage = () => {
   const [selected, setSelected] = useState([]);
   const [details, setDetails] = useState({});
   const [error, setError] = useState('');
+  const mapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   useEffect(() => {
     const load = async () => {
@@ -229,8 +230,18 @@ const NeighborhoodPage = () => {
   };
 
   const mapCenter = compared[0]?.coordinates
-    ? [compared[0].coordinates.lat, compared[0].coordinates.lng]
-    : [18.559, 73.7868];
+    ? { lat: compared[0].coordinates.lat, lng: compared[0].coordinates.lng }
+    : { lat: 18.559, lng: 73.7868 };
+
+  const mapMarkers = neighborhoods.map((area) => ({
+    id: area.id,
+    position: { lat: area.coordinates.lat, lng: area.coordinates.lng },
+    title: area.name,
+    color: markerColor(area.nexScore),
+    scale: selected.includes(area.id) ? 10 : 8,
+    onClick: () => toggleSelection(area.id),
+    infoHtml: `<div><strong>${area.name}</strong><br/>NexScore: ${area.nexScore}<br/>AQI: ${area.metrics.averageAqi}</div>`,
+  }));
 
   return (
     <AppShell
@@ -250,41 +261,7 @@ const NeighborhoodPage = () => {
         >
           <h2 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '14px' }}>Interactive Map</h2>
           <div style={{ height: 360, overflow: 'hidden', borderRadius: '18px' }}>
-            <MapContainer center={mapCenter} zoom={12} style={{ height: '100%', width: '100%' }}>
-              <TileLayer
-                attribution='&copy; OpenStreetMap contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              {neighborhoods.map((area) => (
-                <CircleMarker
-                  key={area.id}
-                  center={[area.coordinates.lat, area.coordinates.lng]}
-                  pathOptions={{
-                    color: markerColor(area.nexScore),
-                    fillColor: markerColor(area.nexScore),
-                    fillOpacity: selected.includes(area.id) ? 0.9 : 0.5,
-                  }}
-                  radius={selected.includes(area.id) ? 16 : 12}
-                  eventHandlers={{
-                    click: () => toggleSelection(area.id),
-                  }}
-                >
-                  <Popup>
-                    <strong>{area.name}</strong>
-                    <br />
-                    NexScore: {area.nexScore}
-                    <br />
-                    AQI: {area.metrics.averageAqi}
-                    {area.liveAqi?.locationName ? (
-                      <>
-                        <br />
-                        Live source: {area.liveAqi.locationName}
-                      </>
-                    ) : null}
-                  </Popup>
-                </CircleMarker>
-              ))}
-            </MapContainer>
+            <GoogleMapView apiKey={mapsApiKey} center={mapCenter} zoom={12} markers={mapMarkers} style={{ height: '100%', width: '100%' }} />
           </div>
         </div>
 

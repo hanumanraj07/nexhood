@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
+const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const neighborhoodRoutes = require('./routes/neighborhoodRoutes');
 const parkingRoutes = require('./routes/parkingRoutes');
@@ -11,7 +12,7 @@ const { connectDb, ensureDb, readDb } = require('./data/store');
 const { requireAuth } = require('./middleware/authMiddleware');
 const { sanitizeUser } = require('./utils/auth');
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const port = process.env.PORT || 4000;
