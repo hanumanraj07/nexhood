@@ -188,7 +188,7 @@ const LocationExplorerPage = () => {
       title: property.name,
       color: '#22c55e',
       scale: 7,
-      infoHtml: `<div><strong>${property.name}</strong><br/>${property.type} • ${property.beds} BHK<br/>Rs. ${currency(property.priceEstimate)}</div>`,
+      infoHtml: `<div><strong>${property.name}</strong><br/>${property.type} . ${property.beds} BHK<br/>Rs. ${currency(property.priceEstimate)}</div>`,
     }));
 
     const amenityMarkers = mapAmenities.map((place) => ({
@@ -341,7 +341,7 @@ const LocationExplorerPage = () => {
                 <div style={placeholderStyle}>No verified image for this listing</div>
               )}
               <h3 style={{ marginTop: '10px', fontSize: '17px', fontWeight: 900 }}>{property.name}</h3>
-              <div style={{ marginTop: '6px', color: N.textLight, fontWeight: 700 }}>{property.type} • {property.beds} BHK • {property.areaSqFt} sq.ft</div>
+              <div style={{ marginTop: '6px', color: N.textLight, fontWeight: 700 }}>{property.type} . {property.beds} BHK . {property.areaSqFt} sq.ft</div>
               <div style={{ marginTop: '8px', color: N.teal, fontWeight: 900 }}>Estimated price: Rs. {currency(property.priceEstimate)}</div>
             </article>
           ))}
